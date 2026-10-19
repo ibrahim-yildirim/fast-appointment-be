@@ -3,6 +3,8 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.CreateCustomerRequest;
 import org.fastappointment.api.dto.CustomerResponse;
 import org.fastappointment.entity.concretes.Customer;
+import org.fastappointment.exception.ErrorMessageKeys;
+import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.CustomerEntityToCustomerResponse;
 import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.service.CustomerService;
@@ -34,7 +36,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse findById(Long id) {
         return customerRepository.findById(id)
                 .map(customerEntityToCustomerResponse::toResponse)
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, id));
     }
 
     @Override

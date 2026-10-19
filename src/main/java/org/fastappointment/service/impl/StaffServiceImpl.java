@@ -4,6 +4,8 @@ import org.fastappointment.api.dto.CreateStaffRequest;
 import org.fastappointment.api.dto.StaffResponse;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Staff;
+import org.fastappointment.exception.ErrorMessageKeys;
+import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.StaffEntityToStaffResponse;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.StaffRepository;
@@ -38,13 +40,14 @@ public class StaffServiceImpl implements StaffService {
     public StaffResponse findById(Long id) {
         return staffRepository.findById(id)
                 .map(staffEntityToStaffResponse::toResponse)
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, id));
     }
 
     @Override
     @Transactional
     public StaffResponse create(CreateStaffRequest request) {
-        Business business = businessRepository.findById(request.getBusinessId()).orElseThrow();
+        Business business = businessRepository.findById(request.getBusinessId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
         Staff staff = Staff.builder()
                 .business(business)
                 .name(request.getName())

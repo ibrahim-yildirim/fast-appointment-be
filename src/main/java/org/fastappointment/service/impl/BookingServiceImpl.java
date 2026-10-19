@@ -8,6 +8,8 @@ import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Customer;
 import org.fastappointment.entity.concretes.ServiceOffering;
 import org.fastappointment.entity.concretes.Staff;
+import org.fastappointment.exception.ErrorMessageKeys;
+import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.BookingEntityToBookingResponse;
 import org.fastappointment.repository.BookingRepository;
 import org.fastappointment.repository.BusinessRepository;
@@ -52,13 +54,17 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse create(CreateBookingRequest request) {
-        Business business = businessRepository.findById(request.getBusinessId()).orElseThrow();
-        ServiceOffering service = serviceOfferingRepository.findById(request.getServiceId()).orElseThrow();
-        Staff staff = staffRepository.findById(request.getStaffId()).orElseThrow();
+        Business business = businessRepository.findById(request.getBusinessId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
+        ServiceOffering service = serviceOfferingRepository.findById(request.getServiceId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.SERVICE_NOT_FOUND, request.getServiceId()));
+        Staff staff = staffRepository.findById(request.getStaffId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, request.getStaffId()));
 
         Customer customer = null;
         if (request.getCustomerId() != null) {
-            customer = customerRepository.findById(request.getCustomerId()).orElseThrow();
+            customer = customerRepository.findById(request.getCustomerId())
+                    .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, request.getCustomerId()));
         }
 
         Booking booking = Booking.builder()

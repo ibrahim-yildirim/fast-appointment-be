@@ -3,6 +3,9 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.BusinessResponse;
 import org.fastappointment.api.dto.CreateBusinessRequest;
 import org.fastappointment.entity.concretes.Business;
+import org.fastappointment.exception.ConflictException;
+import org.fastappointment.exception.ErrorMessageKeys;
+import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.BusinessEntityToBusinessResponse;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.service.BusinessService;
@@ -33,14 +36,14 @@ public class BusinessServiceImpl implements BusinessService {
     public BusinessResponse findBySlug(String slug) {
         return businessRepository.findBySlug(slug)
                 .map(businessEntityToBusinessResponse::toResponse)
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, slug));
     }
 
     @Override
     @Transactional
     public BusinessResponse create(CreateBusinessRequest request) {
         if (businessRepository.existsBySlug(request.getSlug())) {
-            throw new IllegalArgumentException("Slug already taken: " + request.getSlug());
+            throw new ConflictException(ErrorMessageKeys.BUSINESS_SLUG_TAKEN, request.getSlug());
         }
         Business business = Business.builder()
                 .slug(request.getSlug())

@@ -3,6 +3,8 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: fast-appointment-be
+  messages:
+    fallback-to-system-locale: false
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

@@ -4,6 +4,8 @@ import org.fastappointment.api.dto.CreateServiceOfferingRequest;
 import org.fastappointment.api.dto.ServiceOfferingResponse;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.ServiceOffering;
+import org.fastappointment.exception.ErrorMessageKeys;
+import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.ServiceOfferingEntityToServiceOfferingResponse;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.ServiceOfferingRepository;
@@ -39,13 +41,14 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     public ServiceOfferingResponse findById(Long id) {
         return serviceOfferingRepository.findById(id)
                 .map(serviceOfferingEntityToServiceOfferingResponse::toResponse)
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.SERVICE_NOT_FOUND, id));
     }
 
     @Override
     @Transactional
     public ServiceOfferingResponse create(CreateServiceOfferingRequest request) {
-        Business business = businessRepository.findById(request.getBusinessId()).orElseThrow();
+        Business business = businessRepository.findById(request.getBusinessId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
         ServiceOffering serviceOffering = ServiceOffering.builder()
                 .business(business)
                 .name(request.getName())
