@@ -8,6 +8,7 @@ import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Customer;
 import org.fastappointment.entity.concretes.ServiceOffering;
 import org.fastappointment.entity.concretes.Staff;
+import org.fastappointment.exception.ConflictException;
 import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.BookingEntityToBookingResponse;
@@ -65,6 +66,12 @@ public class BookingServiceImpl implements BookingService {
         if (request.getCustomerId() != null) {
             customer = customerRepository.findById(request.getCustomerId())
                     .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, request.getCustomerId()));
+        }
+
+        boolean staffBusy = bookingRepository.existsOverlappingBooking(
+                staff.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
+        if (staffBusy) {
+            throw new ConflictException(ErrorMessageKeys.STAFF_NOT_AVAILABLE, staff.getName());
         }
 
         Booking booking = Booking.builder()

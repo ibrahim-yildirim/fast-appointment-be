@@ -52,7 +52,6 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, message, request, null);
     }
 
-    // Args are turned into plain strings so ids aren't formatted as numbers ("1,234" / "1.234").
     private String translate(String messageKey, Object... args) {
         Object[] textArgs = Arrays.stream(args).map(String::valueOf).toArray();
         return messageSource.getMessage(messageKey, textArgs, LocaleContextHolder.getLocale());
