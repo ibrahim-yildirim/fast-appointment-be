@@ -1,6 +1,7 @@
 package org.fastappointment.api.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class BusinessResponse {
 
@@ -12,10 +13,12 @@ public class BusinessResponse {
     private final String address;
     private final String phone;
     private final String email;
+    private final List<BusinessHoursResponse> defaultHours;
     private final LocalDateTime createdAt;
 
     public BusinessResponse(Long id, String slug, String name, String description, String timezone,
-                            String address, String phone, String email, LocalDateTime createdAt) {
+                            String address, String phone, String email, List<BusinessHoursResponse> defaultHours,
+                            LocalDateTime createdAt) {
         this.id = id;
         this.slug = slug;
         this.name = name;
@@ -24,6 +27,7 @@ public class BusinessResponse {
         this.address = address;
         this.phone = phone;
         this.email = email;
+        this.defaultHours = defaultHours;
         this.createdAt = createdAt;
     }
 
@@ -57,6 +61,10 @@ public class BusinessResponse {
 
     public String getEmail() {
         return email;
+    }
+
+    public List<BusinessHoursResponse> getDefaultHours() {
+        return defaultHours;
     }
 
     public LocalDateTime getCreatedAt() {

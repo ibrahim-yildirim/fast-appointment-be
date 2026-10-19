@@ -1,42 +1,59 @@
 package org.fastappointment.service.impl;
 
+import org.fastappointment.api.dto.BusinessHoursRequest;
 import org.fastappointment.api.dto.BusinessResponse;
 import org.fastappointment.api.dto.CreateBusinessRequest;
 import org.fastappointment.entity.concretes.Business;
+import org.fastappointment.entity.concretes.BusinessHours;
 import org.fastappointment.exception.ConflictException;
 import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.BusinessEntityToBusinessResponse;
+import org.fastappointment.repository.BusinessHoursRepository;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.service.BusinessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BusinessServiceImpl implements BusinessService {
 
     private final BusinessRepository businessRepository;
+    private final BusinessHoursRepository businessHoursRepository;
     private final BusinessEntityToBusinessResponse businessEntityToBusinessResponse;
 
-    public BusinessServiceImpl(BusinessRepository businessRepository, BusinessEntityToBusinessResponse businessEntityToBusinessResponse) {
+    public BusinessServiceImpl(BusinessRepository businessRepository, BusinessHoursRepository businessHoursRepository,
+                               BusinessEntityToBusinessResponse businessEntityToBusinessResponse) {
         this.businessRepository = businessRepository;
+        this.businessHoursRepository = businessHoursRepository;
         this.businessEntityToBusinessResponse = businessEntityToBusinessResponse;
     }
 
     @Override
     public List<BusinessResponse> findAll() {
-        return businessRepository.findAll().stream()
-                .map(businessEntityToBusinessResponse::toResponse)
+        List<Business> businesses = businessRepository.findAll();
+        List<Long> businessIds = businesses.stream()
+                .map(Business::getId)
+                .toList();
+        Map<Long, List<BusinessHours>> hoursByBusinessId = businessHoursRepository.findByBusinessIdIn(businessIds).stream()
+                .collect(Collectors.groupingBy(hours -> hours.getBusiness().getId()));
+
+        return businesses.stream()
+                .map(business -> businessEntityToBusinessResponse.toResponse(
+                        business, hoursByBusinessId.getOrDefault(business.getId(), List.of())))
                 .toList();
     }
 
     @Override
     public BusinessResponse findBySlug(String slug) {
-        return businessRepository.findBySlug(slug)
-                .map(businessEntityToBusinessResponse::toResponse)
+        Business business = businessRepository.findBySlug(slug)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, slug));
+        List<BusinessHours> hours = businessHoursRepository.findByBusinessId(business.getId());
+        return businessEntityToBusinessResponse.toResponse(business, hours);
     }
 
     @Override
@@ -54,6 +71,23 @@ public class BusinessServiceImpl implements BusinessService {
                 .phone(request.getPhone())
                 .email(request.getEmail())
                 .build();
-        return businessEntityToBusinessResponse.toResponse(businessRepository.save(business));
+        Business savedBusiness = businessRepository.save(business);
+
+        List<BusinessHours> hours = request.getHours().stream()
+                .map(hoursRequest -> toBusinessHours(savedBusiness, hoursRequest))
+                .toList();
+        List<BusinessHours> savedHours = businessHoursRepository.saveAll(hours);
+
+        return businessEntityToBusinessResponse.toResponse(savedBusiness, savedHours);
+    }
+
+    private BusinessHours toBusinessHours(Business business, BusinessHoursRequest request) {
+        return BusinessHours.builder()
+                .business(business)
+                .dayOfWeek(request.getDay())
+                .enabled(request.getEnabled())
+                .startTime(request.getStart())
+                .endTime(request.getEnd())
+                .build();
     }
 }

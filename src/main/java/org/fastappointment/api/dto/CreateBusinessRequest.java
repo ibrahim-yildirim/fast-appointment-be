@@ -1,15 +1,20 @@
 package org.fastappointment.api.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public class CreateBusinessRequest {
 
     @NotBlank
     @Size(max = 64)
-    @Pattern(regexp = "^[a-z0-9]+(-[a-z0-9]+)*$", message = "must be lowercase letters, digits and single hyphens")
+    @Pattern(regexp = "^[a-z0-9]+(-[a-z0-9]+)*$", message = "{error.business.slugFormat}")
     private String slug;
 
     @NotBlank
@@ -35,6 +40,23 @@ public class CreateBusinessRequest {
     @Email
     @Size(max = 255)
     private String email;
+
+    @NotNull
+    @Size(min = 7, max = 7)
+    @Valid
+    private List<BusinessHoursRequest> hours;
+
+    @AssertTrue(message = "{error.hours.duplicateDay}")
+    public boolean isEveryDayOnce() {
+        if (hours == null) {
+            return true;
+        }
+        long distinctDays = hours.stream()
+                .map(BusinessHoursRequest::getDay)
+                .distinct()
+                .count();
+        return distinctDays == hours.size();
+    }
 
     public String getSlug() {
         return slug;
@@ -90,5 +112,13 @@ public class CreateBusinessRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<BusinessHoursRequest> getHours() {
+        return hours;
+    }
+
+    public void setHours(List<BusinessHoursRequest> hours) {
+        this.hours = hours;
     }
 }
