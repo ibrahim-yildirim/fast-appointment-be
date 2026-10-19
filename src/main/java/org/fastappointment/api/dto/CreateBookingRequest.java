@@ -1,0 +1,83 @@
+package org.fastappointment.api.dto;
+
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDateTime;
+
+public class CreateBookingRequest {
+
+    @NotNull
+    private Long businessId;
+
+    @NotNull
+    private Long serviceId;
+
+    @NotNull
+    private Long staffId;
+
+    private Long customerId;
+
+    @NotNull
+    private LocalDateTime startsAt;
+
+    @NotNull
+    private LocalDateTime endsAt;
+
+    private String notes;
+
+    public Long getBusinessId() {
+        return businessId;
+    }
+
+    public void setBusinessId(Long businessId) {
+        this.businessId = businessId;
+    }
+
+    public Long getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public Long getStaffId() {
+        return staffId;
+    }
+
+    public void setStaffId(Long staffId) {
+        this.staffId = staffId;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public LocalDateTime getStartsAt() {
+        return startsAt;
+    }
+
+    public void setStartsAt(LocalDateTime startsAt) {
+        this.startsAt = startsAt;
+    }
+
+    public LocalDateTime getEndsAt() {
+        return endsAt;
+    }
+
+    public void setEndsAt(LocalDateTime endsAt) {
+        this.endsAt = endsAt;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+}

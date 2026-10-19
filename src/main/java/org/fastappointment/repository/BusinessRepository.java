@@ -1,0 +1,13 @@
+package org.fastappointment.repository;
+
+import org.fastappointment.entity.concretes.Business;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface BusinessRepository extends JpaRepository<Business, Long> {
+
+    Optional<Business> findBySlug(String slug);
+
+    boolean existsBySlug(String slug);
+}
