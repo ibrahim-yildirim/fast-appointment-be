@@ -11,6 +11,9 @@ public class Customer extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
+
     private String name;
 
     private String email;
@@ -19,6 +22,7 @@ public class Customer extends BaseEntity {
     }
 
     private Customer(Builder builder) {
+        this.user = builder.user;
         this.name = builder.name;
         this.email = builder.email;
     }
@@ -31,6 +35,10 @@ public class Customer extends BaseEntity {
         return id;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public String getName() {
         return name;
     }
@@ -41,10 +49,16 @@ public class Customer extends BaseEntity {
 
     public static class Builder {
 
+        private User user;
         private String name;
         private String email;
 
         private Builder() {
+        }
+
+        public Builder user(User user) {
+            this.user = user;
+            return this;
         }
 
         public Builder name(String name) {
