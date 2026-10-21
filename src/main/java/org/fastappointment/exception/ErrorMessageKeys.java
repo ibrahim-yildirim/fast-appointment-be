@@ -10,6 +10,7 @@ public final class ErrorMessageKeys {
     public static final String STAFF_NOT_AVAILABLE = "error.booking.staffNotAvailable";
     public static final String OUTSIDE_OPENING_HOURS = "error.booking.outsideOpeningHours";
     public static final String EMAIL_TAKEN = "error.auth.emailTaken";
+    public static final String INVALID_CREDENTIALS = "error.auth.invalidCredentials";
     public static final String VALIDATION_FAILED = "error.validation.failed";
     public static final String MALFORMED_REQUEST = "error.request.malformed";
 

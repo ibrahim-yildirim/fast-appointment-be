@@ -1,8 +1,9 @@
 package org.fastappointment.api;
 
 import jakarta.validation.Valid;
+import org.fastappointment.api.dto.AuthResponse;
+import org.fastappointment.api.dto.LoginRequest;
 import org.fastappointment.api.dto.RegisterRequest;
-import org.fastappointment.api.dto.UserResponse;
 import org.fastappointment.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,22 @@ public class AuthController {
     }
 
     @PostMapping("/auth/register")
-    public ResponseEntity<UserResponse> registerCustomer(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> registerCustomer(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerCustomer(request));
     }
 
     @PostMapping("/business/auth/register")
-    public ResponseEntity<UserResponse> registerBusinessOwner(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> registerBusinessOwner(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerBusinessOwner(request));
+    }
+
+    @PostMapping("/auth/login")
+    public ResponseEntity<AuthResponse> loginCustomer(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.loginCustomer(request));
+    }
+
+    @PostMapping("/business/auth/login")
+    public ResponseEntity<AuthResponse> loginBusinessOwner(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.loginBusinessOwner(request));
     }
 }

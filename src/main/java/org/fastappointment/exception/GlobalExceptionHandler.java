@@ -52,6 +52,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, message, request, null);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
+        String message = translate(ex.getMessageKey(), ex.getArgs());
+        return buildResponse(HttpStatus.UNAUTHORIZED, message, request, null);
+    }
+
     private String translate(String messageKey, Object... args) {
         Object[] textArgs = Arrays.stream(args).map(String::valueOf).toArray();
         return messageSource.getMessage(messageKey, textArgs, LocaleContextHolder.getLocale());
