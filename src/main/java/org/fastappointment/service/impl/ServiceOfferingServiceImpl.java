@@ -46,9 +46,9 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
 
     @Override
     @Transactional
-    public ServiceOfferingResponse create(CreateServiceOfferingRequest request) {
-        Business business = businessRepository.findById(request.getBusinessId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
+    public ServiceOfferingResponse create(Long ownerId, CreateServiceOfferingRequest request) {
+        Business business = businessRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
         ServiceOffering serviceOffering = ServiceOffering.builder()
                 .business(business)
                 .name(request.getName())

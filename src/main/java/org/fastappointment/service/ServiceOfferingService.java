@@ -11,5 +11,5 @@ public interface ServiceOfferingService {
 
     ServiceOfferingResponse findById(Long id);
 
-    ServiceOfferingResponse create(CreateServiceOfferingRequest request);
+    ServiceOfferingResponse create(Long ownerId, CreateServiceOfferingRequest request);
 }

@@ -11,5 +11,5 @@ public interface StaffService {
 
     StaffResponse findById(Long id);
 
-    StaffResponse create(CreateStaffRequest request);
+    StaffResponse create(Long ownerId, CreateStaffRequest request);
 }

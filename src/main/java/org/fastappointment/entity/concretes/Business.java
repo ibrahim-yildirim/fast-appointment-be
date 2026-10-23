@@ -11,6 +11,10 @@ public class Business extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", unique = true)
+    private User owner;
+
     @Column(unique = true)
     private String slug;
 
@@ -31,6 +35,7 @@ public class Business extends BaseEntity {
     }
 
     private Business(Builder builder) {
+        this.owner = builder.owner;
         this.slug = builder.slug;
         this.name = builder.name;
         this.description = builder.description;
@@ -46,6 +51,10 @@ public class Business extends BaseEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public User getOwner() {
+        return owner;
     }
 
     public String getSlug() {
@@ -78,6 +87,7 @@ public class Business extends BaseEntity {
 
     public static class Builder {
 
+        private User owner;
         private String slug;
         private String name;
         private String description;
@@ -87,6 +97,11 @@ public class Business extends BaseEntity {
         private String email;
 
         private Builder() {
+        }
+
+        public Builder owner(User owner) {
+            this.owner = owner;
+            return this;
         }
 
         public Builder slug(String slug) {

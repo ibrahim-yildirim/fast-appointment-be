@@ -11,5 +11,5 @@ public interface BusinessService {
 
     BusinessResponse findBySlug(String slug);
 
-    BusinessResponse create(CreateBusinessRequest request);
+    BusinessResponse create(Long ownerId, CreateBusinessRequest request);
 }

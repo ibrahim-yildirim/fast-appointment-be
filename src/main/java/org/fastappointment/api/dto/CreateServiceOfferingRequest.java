@@ -10,9 +10,6 @@ import java.math.BigDecimal;
 
 public class CreateServiceOfferingRequest {
 
-    @NotNull
-    private Long businessId;
-
     @NotBlank
     @Size(max = 120)
     private String name;
@@ -29,14 +26,6 @@ public class CreateServiceOfferingRequest {
 
     @NotNull
     private Boolean active;
-
-    public Long getBusinessId() {
-        return businessId;
-    }
-
-    public void setBusinessId(Long businessId) {
-        this.businessId = businessId;
-    }
 
     public String getName() {
         return name;

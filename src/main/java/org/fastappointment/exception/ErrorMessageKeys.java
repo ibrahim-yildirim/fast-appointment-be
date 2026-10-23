@@ -4,6 +4,8 @@ public final class ErrorMessageKeys {
 
     public static final String BUSINESS_NOT_FOUND = "error.business.notFound";
     public static final String BUSINESS_SLUG_TAKEN = "error.business.slugTaken";
+    public static final String OWNER_HAS_BUSINESS = "error.business.ownerHasBusiness";
+    public static final String OWNER_HAS_NO_BUSINESS = "error.business.ownerHasNoBusiness";
     public static final String SERVICE_NOT_FOUND = "error.service.notFound";
     public static final String STAFF_NOT_FOUND = "error.staff.notFound";
     public static final String CUSTOMER_NOT_FOUND = "error.customer.notFound";

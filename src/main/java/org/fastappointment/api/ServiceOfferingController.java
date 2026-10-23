@@ -6,6 +6,7 @@ import org.fastappointment.api.dto.ServiceOfferingResponse;
 import org.fastappointment.service.ServiceOfferingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +32,9 @@ public class ServiceOfferingController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceOfferingResponse> create(@Valid @RequestBody CreateServiceOfferingRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(serviceOfferingService.create(request));
+    public ResponseEntity<ServiceOfferingResponse> create(Authentication authentication,
+                                                          @Valid @RequestBody CreateServiceOfferingRequest request) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(serviceOfferingService.create(ownerId, request));
     }
 }

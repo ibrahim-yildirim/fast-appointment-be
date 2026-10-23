@@ -3,12 +3,14 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.AuthResponse;
 import org.fastappointment.api.dto.LoginRequest;
 import org.fastappointment.api.dto.RegisterRequest;
+import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Customer;
 import org.fastappointment.entity.concretes.User;
 import org.fastappointment.entity.enums.Role;
 import org.fastappointment.exception.ConflictException;
 import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.UnauthorizedException;
+import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.repository.UserRepository;
 import org.fastappointment.service.AuthService;
@@ -22,13 +24,16 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
+    private final BusinessRepository businessRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
 
     public AuthServiceImpl(UserRepository userRepository, CustomerRepository customerRepository,
-                           PasswordEncoder passwordEncoder, TokenService tokenService) {
+                           BusinessRepository businessRepository, PasswordEncoder passwordEncoder,
+                           TokenService tokenService) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
+        this.businessRepository = businessRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
     }
@@ -43,14 +48,14 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .build();
         Customer savedCustomer = customerRepository.save(customer);
-        return toAuthResponse(user, savedCustomer.getId());
+        return toAuthResponse(user, savedCustomer.getId(), null);
     }
 
     @Override
     @Transactional
     public AuthResponse registerBusinessOwner(RegisterRequest request) {
         User user = createUser(request, Role.BUSINESS_OWNER);
-        return toAuthResponse(user, user.getId());
+        return toAuthResponse(user, user.getId(), null);
     }
 
     @Override
@@ -58,13 +63,16 @@ public class AuthServiceImpl implements AuthService {
         User user = authenticate(request, Role.CUSTOMER);
         Customer customer = customerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new UnauthorizedException(ErrorMessageKeys.INVALID_CREDENTIALS));
-        return toAuthResponse(user, customer.getId());
+        return toAuthResponse(user, customer.getId(), null);
     }
 
     @Override
     public AuthResponse loginBusinessOwner(LoginRequest request) {
         User user = authenticate(request, Role.BUSINESS_OWNER);
-        return toAuthResponse(user, user.getId());
+        Long businessId = businessRepository.findByOwnerId(user.getId())
+                .map(Business::getId)
+                .orElse(null);
+        return toAuthResponse(user, user.getId(), businessId);
     }
 
     private User createUser(RegisterRequest request, Role role) {
@@ -91,9 +99,9 @@ public class AuthServiceImpl implements AuthService {
         return user;
     }
 
-    private AuthResponse toAuthResponse(User user, Long actorId) {
+    private AuthResponse toAuthResponse(User user, Long actorId, Long businessId) {
         String token = tokenService.generateToken(user);
-        return new AuthResponse(token, user.getRole(), actorId, null);
+        return new AuthResponse(token, user.getRole(), actorId, businessId);
     }
 
     private String normalizeEmail(String email) {

@@ -11,6 +11,7 @@ import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.BusinessEntityToBusinessResponse;
 import org.fastappointment.repository.BusinessHoursRepository;
 import org.fastappointment.repository.BusinessRepository;
+import org.fastappointment.repository.UserRepository;
 import org.fastappointment.service.BusinessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +25,15 @@ public class BusinessServiceImpl implements BusinessService {
 
     private final BusinessRepository businessRepository;
     private final BusinessHoursRepository businessHoursRepository;
+    private final UserRepository userRepository;
     private final BusinessEntityToBusinessResponse businessEntityToBusinessResponse;
 
     public BusinessServiceImpl(BusinessRepository businessRepository, BusinessHoursRepository businessHoursRepository,
+                               UserRepository userRepository,
                                BusinessEntityToBusinessResponse businessEntityToBusinessResponse) {
         this.businessRepository = businessRepository;
         this.businessHoursRepository = businessHoursRepository;
+        this.userRepository = userRepository;
         this.businessEntityToBusinessResponse = businessEntityToBusinessResponse;
     }
 
@@ -58,11 +62,15 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
-    public BusinessResponse create(CreateBusinessRequest request) {
+    public BusinessResponse create(Long ownerId, CreateBusinessRequest request) {
+        if (businessRepository.existsByOwnerId(ownerId)) {
+            throw new ConflictException(ErrorMessageKeys.OWNER_HAS_BUSINESS);
+        }
         if (businessRepository.existsBySlug(request.getSlug())) {
             throw new ConflictException(ErrorMessageKeys.BUSINESS_SLUG_TAKEN, request.getSlug());
         }
         Business business = Business.builder()
+                .owner(userRepository.getReferenceById(ownerId))
                 .slug(request.getSlug())
                 .name(request.getName())
                 .description(request.getDescription())

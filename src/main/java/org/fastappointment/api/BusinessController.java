@@ -6,6 +6,7 @@ import org.fastappointment.api.dto.CreateBusinessRequest;
 import org.fastappointment.service.BusinessService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +32,9 @@ public class BusinessController {
     }
 
     @PostMapping
-    public ResponseEntity<BusinessResponse> create(@Valid @RequestBody CreateBusinessRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(businessService.create(request));
+    public ResponseEntity<BusinessResponse> create(Authentication authentication,
+                                                   @Valid @RequestBody CreateBusinessRequest request) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(businessService.create(ownerId, request));
     }
 }

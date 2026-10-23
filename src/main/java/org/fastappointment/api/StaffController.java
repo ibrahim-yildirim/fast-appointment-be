@@ -6,6 +6,7 @@ import org.fastappointment.api.dto.StaffResponse;
 import org.fastappointment.service.StaffService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +32,9 @@ public class StaffController {
     }
 
     @PostMapping
-    public ResponseEntity<StaffResponse> create(@Valid @RequestBody CreateStaffRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(staffService.create(request));
+    public ResponseEntity<StaffResponse> create(Authentication authentication,
+                                                @Valid @RequestBody CreateStaffRequest request) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(staffService.create(ownerId, request));
     }
 }

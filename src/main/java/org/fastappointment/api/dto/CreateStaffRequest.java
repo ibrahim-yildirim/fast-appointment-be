@@ -2,13 +2,9 @@ package org.fastappointment.api.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class CreateStaffRequest {
-
-    @NotNull
-    private Long businessId;
 
     @NotBlank
     @Size(max = 120)
@@ -21,14 +17,6 @@ public class CreateStaffRequest {
 
     @Size(max = 32)
     private String colorTag;
-
-    public Long getBusinessId() {
-        return businessId;
-    }
-
-    public void setBusinessId(Long businessId) {
-        this.businessId = businessId;
-    }
 
     public String getName() {
         return name;

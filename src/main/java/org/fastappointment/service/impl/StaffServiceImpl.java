@@ -45,9 +45,9 @@ public class StaffServiceImpl implements StaffService {
 
     @Override
     @Transactional
-    public StaffResponse create(CreateStaffRequest request) {
-        Business business = businessRepository.findById(request.getBusinessId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
+    public StaffResponse create(Long ownerId, CreateStaffRequest request) {
+        Business business = businessRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
         Staff staff = Staff.builder()
                 .business(business)
                 .name(request.getName())
