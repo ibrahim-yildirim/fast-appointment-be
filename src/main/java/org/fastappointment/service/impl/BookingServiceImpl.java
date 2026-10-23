@@ -3,6 +3,7 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.CustomerBookingResponse;
 import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.entity.concretes.Booking;
 import org.fastappointment.entity.enums.BookingStatus;
@@ -15,6 +16,7 @@ import org.fastappointment.exception.ConflictException;
 import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.BookingEntityToBookingResponse;
+import org.fastappointment.mapper.BookingEntityToCustomerBookingResponse;
 import org.fastappointment.repository.BookingRepository;
 import org.fastappointment.repository.BusinessHoursRepository;
 import org.fastappointment.repository.BusinessRepository;
@@ -40,11 +42,13 @@ public class BookingServiceImpl implements BookingService {
     private final CustomerRepository customerRepository;
     private final BusinessHoursRepository businessHoursRepository;
     private final BookingEntityToBookingResponse bookingEntityToBookingResponse;
+    private final BookingEntityToCustomerBookingResponse bookingEntityToCustomerBookingResponse;
 
     public BookingServiceImpl(BookingRepository bookingRepository, BusinessRepository businessRepository,
                               ServiceOfferingRepository serviceOfferingRepository, StaffRepository staffRepository,
                               CustomerRepository customerRepository, BusinessHoursRepository businessHoursRepository,
-                              BookingEntityToBookingResponse bookingEntityToBookingResponse) {
+                              BookingEntityToBookingResponse bookingEntityToBookingResponse,
+                              BookingEntityToCustomerBookingResponse bookingEntityToCustomerBookingResponse) {
         this.bookingRepository = bookingRepository;
         this.businessRepository = businessRepository;
         this.serviceOfferingRepository = serviceOfferingRepository;
@@ -52,26 +56,29 @@ public class BookingServiceImpl implements BookingService {
         this.customerRepository = customerRepository;
         this.businessHoursRepository = businessHoursRepository;
         this.bookingEntityToBookingResponse = bookingEntityToBookingResponse;
+        this.bookingEntityToCustomerBookingResponse = bookingEntityToCustomerBookingResponse;
     }
 
     @Override
-    public List<BookingResponse> findAllForCustomer(Long userId) {
+    public List<CustomerBookingResponse> findAllForCustomer(Long userId) {
         Customer customer = findCustomer(userId);
-        return bookingRepository.findByCustomerId(customer.getId()).stream()
-                .map(bookingEntityToBookingResponse::toResponse)
+        return bookingRepository.findByCustomerIdOrderByStartsAtAsc(customer.getId()).stream()
+                .map(bookingEntityToCustomerBookingResponse::toResponse)
                 .toList();
     }
 
     @Override
     @Transactional
-    public BookingResponse createForCustomer(Long userId, CreateBookingRequest request) {
+    public CustomerBookingResponse createForCustomer(Long userId, CreateBookingRequest request) {
         Customer customer = findCustomer(userId);
         Business business = businessRepository.findById(request.getBusinessId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
-        checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
+        LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
+        checkSlotIsFree(business, staff, request.getStartsAt(), endsAt);
+        checkCustomerIsFree(customer, request.getStartsAt(), endsAt);
 
         Booking booking = Booking.builder()
                 .business(business)
@@ -79,20 +86,20 @@ public class BookingServiceImpl implements BookingService {
                 .staff(staff)
                 .customer(customer)
                 .startsAt(request.getStartsAt())
-                .endsAt(request.getEndsAt())
+                .endsAt(endsAt)
                 .status(BookingStatus.CONFIRMED)
                 .notes(request.getNotes())
                 .build();
-        return bookingEntityToBookingResponse.toResponse(bookingRepository.save(booking));
+        return bookingEntityToCustomerBookingResponse.toResponse(bookingRepository.save(booking));
     }
 
     @Override
     @Transactional
-    public BookingResponse updateForCustomer(Long userId, Long bookingId, UpdateBookingRequest request) {
+    public CustomerBookingResponse updateForCustomer(Long userId, Long bookingId, UpdateBookingRequest request) {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
-        return reschedule(booking, request);
+        return bookingEntityToCustomerBookingResponse.toResponse(reschedule(booking, request));
     }
 
     @Override
@@ -121,6 +128,7 @@ public class BookingServiceImpl implements BookingService {
         checkStaffOffersService(staff, service);
         checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
         Customer customer = findOrCreateBusinessCustomer(business, request);
+        checkCustomerIsFree(customer, request.getStartsAt(), request.getEndsAt());
 
         Booking booking = Booking.builder()
                 .business(business)
@@ -141,7 +149,7 @@ public class BookingServiceImpl implements BookingService {
         Business business = findOwnerBusiness(ownerId);
         Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
-        return reschedule(booking, request);
+        return bookingEntityToBookingResponse.toResponse(reschedule(booking, request));
     }
 
     @Override
@@ -188,7 +196,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, staffId));
     }
 
-    private BookingResponse reschedule(Booking booking, UpdateBookingRequest request) {
+    private Booking reschedule(Booking booking, UpdateBookingRequest request) {
         Business business = booking.getBusiness();
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
@@ -199,13 +207,27 @@ public class BookingServiceImpl implements BookingService {
         if (staffBusy) {
             throw new ConflictException(ErrorMessageKeys.STAFF_NOT_AVAILABLE, staff.getName());
         }
+        Customer customer = booking.getCustomer();
+        boolean customerBusy = customer != null && bookingRepository.existsOverlappingCustomerBookingExcluding(
+                booking.getId(), customer.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
+        if (customerBusy) {
+            throw new ConflictException(ErrorMessageKeys.CUSTOMER_NOT_AVAILABLE, customer.getName());
+        }
         booking.reschedule(service, staff, request.getStartsAt(), request.getEndsAt(), request.getNotes());
-        return bookingEntityToBookingResponse.toResponse(booking);
+        return booking;
     }
 
     private void checkStaffOffersService(Staff staff, ServiceOffering service) {
         if (!service.getEligibleStaff().contains(staff)) {
             throw new ConflictException(ErrorMessageKeys.STAFF_NOT_ELIGIBLE, staff.getName(), service.getName());
+        }
+    }
+
+    private void checkCustomerIsFree(Customer customer, LocalDateTime startsAt, LocalDateTime endsAt) {
+        boolean customerBusy = bookingRepository.existsOverlappingCustomerBooking(
+                customer.getId(), startsAt, endsAt, BookingStatus.CANCELLED);
+        if (customerBusy) {
+            throw new ConflictException(ErrorMessageKeys.CUSTOMER_NOT_AVAILABLE, customer.getName());
         }
     }
 

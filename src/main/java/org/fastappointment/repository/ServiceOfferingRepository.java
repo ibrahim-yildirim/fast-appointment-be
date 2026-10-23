@@ -21,4 +21,7 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
     Optional<ServiceOffering> findByIdAndBusinessId(Long id, Long businessId);
 
     Optional<ServiceOffering> findByIdAndBusinessIdAndActiveTrue(Long id, Long businessId);
+
+    @EntityGraph(attributePaths = "eligibleStaff")
+    Optional<ServiceOffering> findWithEligibleStaffByIdAndBusinessIdAndActiveTrue(Long id, Long businessId);
 }

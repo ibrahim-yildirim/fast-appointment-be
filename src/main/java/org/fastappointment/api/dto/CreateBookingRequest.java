@@ -1,6 +1,5 @@
 package org.fastappointment.api.dto;
 
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
@@ -19,18 +18,7 @@ public class CreateBookingRequest {
     @NotNull
     private LocalDateTime startsAt;
 
-    @NotNull
-    private LocalDateTime endsAt;
-
     private String notes;
-
-    @AssertTrue(message = "{error.booking.endsBeforeStarts}")
-    public boolean isEndsAfterStarts() {
-        if (startsAt == null || endsAt == null) {
-            return true;
-        }
-        return endsAt.isAfter(startsAt);
-    }
 
     public Long getBusinessId() {
         return businessId;
@@ -62,14 +50,6 @@ public class CreateBookingRequest {
 
     public void setStartsAt(LocalDateTime startsAt) {
         this.startsAt = startsAt;
-    }
-
-    public LocalDateTime getEndsAt() {
-        return endsAt;
-    }
-
-    public void setEndsAt(LocalDateTime endsAt) {
-        this.endsAt = endsAt;
     }
 
     public String getNotes() {

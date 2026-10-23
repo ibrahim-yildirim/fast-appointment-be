@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.CustomerBookingResponse;
 import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.service.BookingService;
 import org.springframework.http.HttpStatus;
@@ -24,21 +25,21 @@ public class BookingController {
     }
 
     @GetMapping("/bookings")
-    public ResponseEntity<List<BookingResponse>> getMyBookings(Authentication authentication) {
+    public ResponseEntity<List<CustomerBookingResponse>> getMyBookings(Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok().body(bookingService.findAllForCustomer(userId));
     }
 
     @PostMapping("/bookings")
-    public ResponseEntity<BookingResponse> createBooking(Authentication authentication,
-                                                         @Valid @RequestBody CreateBookingRequest request) {
+    public ResponseEntity<CustomerBookingResponse> createBooking(Authentication authentication,
+                                                                 @Valid @RequestBody CreateBookingRequest request) {
         Long userId = Long.valueOf(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createForCustomer(userId, request));
     }
 
     @PutMapping("/bookings/{id}")
-    public ResponseEntity<BookingResponse> updateBooking(Authentication authentication, @PathVariable Long id,
-                                                         @Valid @RequestBody UpdateBookingRequest request) {
+    public ResponseEntity<CustomerBookingResponse> updateBooking(Authentication authentication, @PathVariable Long id,
+                                                                 @Valid @RequestBody UpdateBookingRequest request) {
         Long userId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok().body(bookingService.updateForCustomer(userId, id, request));
     }
