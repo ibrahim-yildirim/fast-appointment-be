@@ -108,14 +108,13 @@ public class BookingServiceImpl implements BookingService {
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
         checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
+        Customer customer = findOrCreateBusinessCustomer(business, request);
 
         Booking booking = Booking.builder()
                 .business(business)
                 .service(service)
                 .staff(staff)
-                .guestName(request.getGuestName())
-                .guestPhone(request.getGuestPhone())
-                .guestEmail(request.getGuestEmail())
+                .customer(customer)
                 .startsAt(request.getStartsAt())
                 .endsAt(request.getEndsAt())
                 .status(BookingStatus.CONFIRMED)
@@ -141,6 +140,21 @@ public class BookingServiceImpl implements BookingService {
     private Business findOwnerBusiness(Long ownerId) {
         return businessRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
+    }
+
+    private Customer findOrCreateBusinessCustomer(Business business, CreateBusinessBookingRequest request) {
+        String phone = normalizePhone(request.getCustomerPhone());
+        return customerRepository.findByBusinessIdAndPhone(business.getId(), phone)
+                .orElseGet(() -> customerRepository.save(Customer.builder()
+                        .business(business)
+                        .name(request.getCustomerName())
+                        .phone(phone)
+                        .email(request.getCustomerEmail())
+                        .build()));
+    }
+
+    private String normalizePhone(String phone) {
+        return phone.replaceAll("[^0-9+]", "");
     }
 
     private ServiceOffering findService(Business business, Long serviceId) {

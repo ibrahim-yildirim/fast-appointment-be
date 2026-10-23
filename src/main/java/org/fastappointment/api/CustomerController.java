@@ -6,6 +6,7 @@ import org.fastappointment.api.dto.CustomerResponse;
 import org.fastappointment.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,17 +22,21 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CustomerResponse>> getAll() {
-        return ResponseEntity.ok().body(customerService.findAll());
+    public ResponseEntity<List<CustomerResponse>> getAll(Authentication authentication) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(customerService.findAllForOwner(ownerId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(customerService.findById(id));
+    public ResponseEntity<CustomerResponse> getById(Authentication authentication, @PathVariable Long id) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(customerService.findByIdForOwner(ownerId, id));
     }
 
     @PostMapping
-    public ResponseEntity<CustomerResponse> create(@Valid @RequestBody CreateCustomerRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.create(request));
+    public ResponseEntity<CustomerResponse> create(Authentication authentication,
+                                                   @Valid @RequestBody CreateCustomerRequest request) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createForOwner(ownerId, request));
     }
 }

@@ -11,6 +11,9 @@ public class CreateCustomerRequest {
     private String name;
 
     @NotBlank
+    @Size(max = 32)
+    private String phone;
+
     @Email
     @Size(max = 255)
     private String email;
@@ -21,6 +24,14 @@ public class CreateCustomerRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getEmail() {

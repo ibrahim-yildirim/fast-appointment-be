@@ -18,15 +18,15 @@ public class CreateBusinessBookingRequest {
 
     @NotBlank
     @Size(max = 120)
-    private String guestName;
+    private String customerName;
 
     @NotBlank
     @Size(max = 32)
-    private String guestPhone;
+    private String customerPhone;
 
     @Email
     @Size(max = 255)
-    private String guestEmail;
+    private String customerEmail;
 
     @NotNull
     private LocalDateTime startsAt;
@@ -60,28 +60,28 @@ public class CreateBusinessBookingRequest {
         this.staffId = staffId;
     }
 
-    public String getGuestName() {
-        return guestName;
+    public String getCustomerName() {
+        return customerName;
     }
 
-    public void setGuestName(String guestName) {
-        this.guestName = guestName;
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
-    public String getGuestPhone() {
-        return guestPhone;
+    public String getCustomerPhone() {
+        return customerPhone;
     }
 
-    public void setGuestPhone(String guestPhone) {
-        this.guestPhone = guestPhone;
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
     }
 
-    public String getGuestEmail() {
-        return guestEmail;
+    public String getCustomerEmail() {
+        return customerEmail;
     }
 
-    public void setGuestEmail(String guestEmail) {
-        this.guestEmail = guestEmail;
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
     }
 
     public LocalDateTime getStartsAt() {

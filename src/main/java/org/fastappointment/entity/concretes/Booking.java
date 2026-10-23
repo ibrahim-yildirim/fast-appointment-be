@@ -26,12 +26,6 @@ public class Booking extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
 
-    private String guestName;
-
-    private String guestPhone;
-
-    private String guestEmail;
-
     private LocalDateTime startsAt;
 
     private LocalDateTime endsAt;
@@ -50,9 +44,6 @@ public class Booking extends BaseEntity {
         this.service = builder.service;
         this.staff = builder.staff;
         this.customer = builder.customer;
-        this.guestName = builder.guestName;
-        this.guestPhone = builder.guestPhone;
-        this.guestEmail = builder.guestEmail;
         this.startsAt = builder.startsAt;
         this.endsAt = builder.endsAt;
         this.status = builder.status;
@@ -83,18 +74,6 @@ public class Booking extends BaseEntity {
         return customer;
     }
 
-    public String getGuestName() {
-        return guestName;
-    }
-
-    public String getGuestPhone() {
-        return guestPhone;
-    }
-
-    public String getGuestEmail() {
-        return guestEmail;
-    }
-
     public LocalDateTime getStartsAt() {
         return startsAt;
     }
@@ -117,9 +96,6 @@ public class Booking extends BaseEntity {
         private ServiceOffering service;
         private Staff staff;
         private Customer customer;
-        private String guestName;
-        private String guestPhone;
-        private String guestEmail;
         private LocalDateTime startsAt;
         private LocalDateTime endsAt;
         private BookingStatus status;
@@ -145,21 +121,6 @@ public class Booking extends BaseEntity {
 
         public Builder customer(Customer customer) {
             this.customer = customer;
-            return this;
-        }
-
-        public Builder guestName(String guestName) {
-            this.guestName = guestName;
-            return this;
-        }
-
-        public Builder guestPhone(String guestPhone) {
-            this.guestPhone = guestPhone;
-            return this;
-        }
-
-        public Builder guestEmail(String guestEmail) {
-            this.guestEmail = guestEmail;
             return this;
         }
 

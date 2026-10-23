@@ -9,6 +9,7 @@ public final class ErrorMessageKeys {
     public static final String SERVICE_NOT_FOUND = "error.service.notFound";
     public static final String STAFF_NOT_FOUND = "error.staff.notFound";
     public static final String CUSTOMER_NOT_FOUND = "error.customer.notFound";
+    public static final String CUSTOMER_PHONE_TAKEN = "error.customer.phoneTaken";
     public static final String BOOKING_NOT_FOUND = "error.booking.notFound";
     public static final String STAFF_NOT_AVAILABLE = "error.booking.staffNotAvailable";
     public static final String OUTSIDE_OPENING_HOURS = "error.booking.outsideOpeningHours";

@@ -11,6 +11,7 @@ public class CustomerEntityToCustomerResponse {
         return new CustomerResponse(
                 customer.getId(),
                 customer.getName(),
+                customer.getPhone(),
                 customer.getEmail()
         );
     }

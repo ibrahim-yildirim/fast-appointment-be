@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface CustomerService {
 
-    List<CustomerResponse> findAll();
+    List<CustomerResponse> findAllForOwner(Long ownerId);
 
-    CustomerResponse findById(Long id);
+    CustomerResponse findByIdForOwner(Long ownerId, Long id);
 
-    CustomerResponse create(CreateCustomerRequest request);
+    CustomerResponse createForOwner(Long ownerId, CreateCustomerRequest request);
 }
