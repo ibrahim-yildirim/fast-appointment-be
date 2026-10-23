@@ -2,6 +2,10 @@ package org.fastappointment.entity.concretes;
 
 import jakarta.persistence.*;
 import org.fastappointment.entity.abstracts.BaseEntity;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "staff")
@@ -20,6 +24,13 @@ public class Staff extends BaseEntity {
 
     private String colorTag;
 
+    @ColumnDefault("true")
+    @Column(nullable = false)
+    private Boolean active;
+
+    @ManyToMany(mappedBy = "eligibleStaff")
+    private Set<ServiceOffering> services = new HashSet<>();
+
     protected Staff() {
     }
 
@@ -28,6 +39,7 @@ public class Staff extends BaseEntity {
         this.name = builder.name;
         this.email = builder.email;
         this.colorTag = builder.colorTag;
+        this.active = true;
     }
 
     public static Builder builder() {
@@ -54,10 +66,22 @@ public class Staff extends BaseEntity {
         return colorTag;
     }
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public Set<ServiceOffering> getServices() {
+        return services;
+    }
+
     public void update(String name, String email, String colorTag) {
         this.name = name;
         this.email = email;
         this.colorTag = colorTag;
+    }
+
+    public void deactivate() {
+        this.active = false;
     }
 
     public static class Builder {

@@ -98,6 +98,10 @@ public class Booking extends BaseEntity {
         this.notes = notes;
     }
 
+    public void cancel() {
+        this.status = BookingStatus.CANCELLED;
+    }
+
     public static class Builder {
 
         private Business business;

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.fastappointment.entity.abstracts.BaseEntity;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "services")
@@ -26,6 +28,12 @@ public class ServiceOffering extends BaseEntity {
     private BigDecimal price;
 
     private Boolean active;
+
+    @ManyToMany
+    @JoinTable(name = "service_staff",
+            joinColumns = @JoinColumn(name = "service_id"),
+            inverseJoinColumns = @JoinColumn(name = "staff_id"))
+    private Set<Staff> eligibleStaff = new HashSet<>();
 
     protected ServiceOffering() {
     }
@@ -71,12 +79,35 @@ public class ServiceOffering extends BaseEntity {
         return active;
     }
 
+    public Set<Staff> getEligibleStaff() {
+        return eligibleStaff;
+    }
+
     public void update(String name, String description, Integer durationMinutes, BigDecimal price, Boolean active) {
         this.name = name;
         this.description = description;
         this.durationMinutes = durationMinutes;
         this.price = price;
         this.active = active;
+    }
+
+    public void deactivate() {
+        this.active = false;
+    }
+
+    public void replaceEligibleStaff(Set<Staff> staff) {
+        Set.copyOf(eligibleStaff).forEach(this::removeStaff);
+        staff.forEach(this::addStaff);
+    }
+
+    public void addStaff(Staff staff) {
+        eligibleStaff.add(staff);
+        staff.getServices().add(this);
+    }
+
+    public void removeStaff(Staff staff) {
+        eligibleStaff.remove(staff);
+        staff.getServices().remove(this);
     }
 
     public static class Builder {

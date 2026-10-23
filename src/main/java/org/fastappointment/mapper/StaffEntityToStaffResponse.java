@@ -1,6 +1,7 @@
 package org.fastappointment.mapper;
 
 import org.fastappointment.api.dto.StaffResponse;
+import org.fastappointment.entity.concretes.ServiceOffering;
 import org.fastappointment.entity.concretes.Staff;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,12 @@ public class StaffEntityToStaffResponse {
                 staff.getBusiness().getId(),
                 staff.getName(),
                 staff.getEmail(),
-                staff.getColorTag()
+                staff.getColorTag(),
+                staff.getActive(),
+                staff.getServices().stream()
+                        .map(ServiceOffering::getId)
+                        .sorted()
+                        .toList()
         );
     }
 }

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class UpdateServiceOfferingRequest {
 
@@ -26,6 +27,9 @@ public class UpdateServiceOfferingRequest {
 
     @NotNull
     private Boolean active;
+
+    @NotNull
+    private List<Long> eligibleStaffIds;
 
     public String getName() {
         return name;
@@ -65,5 +69,13 @@ public class UpdateServiceOfferingRequest {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public List<Long> getEligibleStaffIds() {
+        return eligibleStaffIds;
+    }
+
+    public void setEligibleStaffIds(List<Long> eligibleStaffIds) {
+        this.eligibleStaffIds = eligibleStaffIds;
     }
 }

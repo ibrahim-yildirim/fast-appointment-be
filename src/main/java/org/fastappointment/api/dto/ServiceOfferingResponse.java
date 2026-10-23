@@ -1,6 +1,7 @@
 package org.fastappointment.api.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ServiceOfferingResponse {
 
@@ -11,9 +12,11 @@ public class ServiceOfferingResponse {
     private final Integer durationMinutes;
     private final BigDecimal price;
     private final Boolean active;
+    private final List<Long> eligibleStaffIds;
 
     public ServiceOfferingResponse(Long id, Long businessId, String name, String description,
-                                   Integer durationMinutes, BigDecimal price, Boolean active) {
+                                   Integer durationMinutes, BigDecimal price, Boolean active,
+                                   List<Long> eligibleStaffIds) {
         this.id = id;
         this.businessId = businessId;
         this.name = name;
@@ -21,6 +24,7 @@ public class ServiceOfferingResponse {
         this.durationMinutes = durationMinutes;
         this.price = price;
         this.active = active;
+        this.eligibleStaffIds = eligibleStaffIds;
     }
 
     public Long getId() {
@@ -49,5 +53,9 @@ public class ServiceOfferingResponse {
 
     public Boolean getActive() {
         return active;
+    }
+
+    public List<Long> getEligibleStaffIds() {
+        return eligibleStaffIds;
     }
 }
