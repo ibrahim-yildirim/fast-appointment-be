@@ -56,6 +56,10 @@ public class User extends BaseEntity {
         return role;
     }
 
+    public void updateName(String name) {
+        this.name = name;
+    }
+
     public static class Builder {
 
         private String email;

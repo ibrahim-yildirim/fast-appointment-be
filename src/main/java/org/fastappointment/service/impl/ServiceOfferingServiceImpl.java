@@ -2,6 +2,7 @@ package org.fastappointment.service.impl;
 
 import org.fastappointment.api.dto.CreateServiceOfferingRequest;
 import org.fastappointment.api.dto.ServiceOfferingResponse;
+import org.fastappointment.api.dto.UpdateServiceOfferingRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.ServiceOffering;
 import org.fastappointment.exception.ErrorMessageKeys;
@@ -58,5 +59,17 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
                 .active(request.getActive())
                 .build();
         return serviceOfferingEntityToServiceOfferingResponse.toResponse(serviceOfferingRepository.save(serviceOffering));
+    }
+
+    @Override
+    @Transactional
+    public ServiceOfferingResponse update(Long ownerId, Long id, UpdateServiceOfferingRequest request) {
+        Business business = businessRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
+        ServiceOffering serviceOffering = serviceOfferingRepository.findByIdAndBusinessId(id, business.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.SERVICE_NOT_FOUND, id));
+        serviceOffering.update(request.getName(), request.getDescription(), request.getDurationMinutes(),
+                request.getPrice(), request.getActive());
+        return serviceOfferingEntityToServiceOfferingResponse.toResponse(serviceOffering);
     }
 }

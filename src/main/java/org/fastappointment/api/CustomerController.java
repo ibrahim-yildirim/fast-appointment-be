@@ -3,6 +3,7 @@ package org.fastappointment.api;
 import jakarta.validation.Valid;
 import org.fastappointment.api.dto.CreateCustomerRequest;
 import org.fastappointment.api.dto.CustomerResponse;
+import org.fastappointment.api.dto.UpdateCustomerRequest;
 import org.fastappointment.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,5 +39,12 @@ public class CustomerController {
                                                    @Valid @RequestBody CreateCustomerRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createForOwner(ownerId, request));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<CustomerResponse> updateMe(Authentication authentication,
+                                                     @Valid @RequestBody UpdateCustomerRequest request) {
+        Long userId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(customerService.updateForCustomer(userId, request));
     }
 }

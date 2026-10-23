@@ -85,6 +85,15 @@ public class Business extends BaseEntity {
         return email;
     }
 
+    public void update(String name, String description, String timezone, String address, String phone, String email) {
+        this.name = name;
+        this.description = description;
+        this.timezone = timezone;
+        this.address = address;
+        this.phone = phone;
+        this.email = email;
+    }
+
     public static class Builder {
 
         private User owner;

@@ -54,6 +54,12 @@ public class Staff extends BaseEntity {
         return colorTag;
     }
 
+    public void update(String name, String email, String colorTag) {
+        this.name = name;
+        this.email = email;
+        this.colorTag = colorTag;
+    }
+
     public static class Builder {
 
         private Business business;

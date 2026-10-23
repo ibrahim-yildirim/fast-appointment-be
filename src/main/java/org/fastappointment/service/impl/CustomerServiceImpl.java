@@ -2,6 +2,7 @@ package org.fastappointment.service.impl;
 
 import org.fastappointment.api.dto.CreateCustomerRequest;
 import org.fastappointment.api.dto.CustomerResponse;
+import org.fastappointment.api.dto.UpdateCustomerRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Customer;
 import org.fastappointment.exception.ConflictException;
@@ -61,6 +62,17 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(request.getEmail())
                 .build();
         return customerEntityToCustomerResponse.toResponse(customerRepository.save(customer));
+    }
+
+    @Override
+    @Transactional
+    public CustomerResponse updateForCustomer(Long userId, UpdateCustomerRequest request) {
+        Customer customer = customerRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, userId));
+        String phone = request.getPhone() == null || request.getPhone().isBlank() ? null : normalizePhone(request.getPhone());
+        customer.update(request.getName(), phone);
+        customer.getUser().updateName(request.getName());
+        return customerEntityToCustomerResponse.toResponse(customer);
     }
 
     private Business findOwnerBusiness(Long ownerId) {

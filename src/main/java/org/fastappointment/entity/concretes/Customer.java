@@ -62,6 +62,11 @@ public class Customer extends BaseEntity {
         return email;
     }
 
+    public void update(String name, String phone) {
+        this.name = name;
+        this.phone = phone;
+    }
+
     public static class Builder {
 
         private User user;

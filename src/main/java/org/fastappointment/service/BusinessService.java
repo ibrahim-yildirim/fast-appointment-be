@@ -2,6 +2,7 @@ package org.fastappointment.service;
 
 import org.fastappointment.api.dto.BusinessResponse;
 import org.fastappointment.api.dto.CreateBusinessRequest;
+import org.fastappointment.api.dto.UpdateBusinessRequest;
 
 import java.util.List;
 
@@ -12,4 +13,6 @@ public interface BusinessService {
     BusinessResponse findBySlug(String slug);
 
     BusinessResponse create(Long ownerId, CreateBusinessRequest request);
+
+    BusinessResponse update(Long ownerId, UpdateBusinessRequest request);
 }

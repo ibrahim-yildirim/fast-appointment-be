@@ -2,6 +2,7 @@ package org.fastappointment.service;
 
 import org.fastappointment.api.dto.CreateServiceOfferingRequest;
 import org.fastappointment.api.dto.ServiceOfferingResponse;
+import org.fastappointment.api.dto.UpdateServiceOfferingRequest;
 
 import java.util.List;
 
@@ -12,4 +13,6 @@ public interface ServiceOfferingService {
     ServiceOfferingResponse findById(Long id);
 
     ServiceOfferingResponse create(Long ownerId, CreateServiceOfferingRequest request);
+
+    ServiceOfferingResponse update(Long ownerId, Long id, UpdateServiceOfferingRequest request);
 }

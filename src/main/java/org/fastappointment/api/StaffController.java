@@ -3,6 +3,7 @@ package org.fastappointment.api;
 import jakarta.validation.Valid;
 import org.fastappointment.api.dto.CreateStaffRequest;
 import org.fastappointment.api.dto.StaffResponse;
+import org.fastappointment.api.dto.UpdateStaffRequest;
 import org.fastappointment.service.StaffService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +37,12 @@ public class StaffController {
                                                 @Valid @RequestBody CreateStaffRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(staffService.create(ownerId, request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StaffResponse> update(Authentication authentication, @PathVariable Long id,
+                                                @Valid @RequestBody UpdateStaffRequest request) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(staffService.update(ownerId, id, request));
     }
 }

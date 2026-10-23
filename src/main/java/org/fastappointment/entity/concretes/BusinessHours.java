@@ -65,6 +65,12 @@ public class BusinessHours extends BaseEntity {
         return endTime;
     }
 
+    public void update(Boolean enabled, LocalTime startTime, LocalTime endTime) {
+        this.enabled = enabled;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
     public static class Builder {
 
         private Business business;

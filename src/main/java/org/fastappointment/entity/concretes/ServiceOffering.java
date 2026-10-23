@@ -71,6 +71,14 @@ public class ServiceOffering extends BaseEntity {
         return active;
     }
 
+    public void update(String name, String description, Integer durationMinutes, BigDecimal price, Boolean active) {
+        this.name = name;
+        this.description = description;
+        this.durationMinutes = durationMinutes;
+        this.price = price;
+        this.active = active;
+    }
+
     public static class Builder {
 
         private Business business;

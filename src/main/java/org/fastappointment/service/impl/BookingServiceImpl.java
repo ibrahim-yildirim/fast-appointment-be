@@ -3,6 +3,7 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.entity.concretes.Booking;
 import org.fastappointment.entity.enums.BookingStatus;
 import org.fastappointment.entity.concretes.Business;
@@ -86,6 +87,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
+    public BookingResponse updateForCustomer(Long userId, Long bookingId, UpdateBookingRequest request) {
+        Customer customer = findCustomer(userId);
+        Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        return reschedule(booking, request);
+    }
+
+    @Override
+    @Transactional
     public void deleteForCustomer(Long userId, Long bookingId) {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
@@ -121,6 +131,15 @@ public class BookingServiceImpl implements BookingService {
                 .notes(request.getNotes())
                 .build();
         return bookingEntityToBookingResponse.toResponse(bookingRepository.save(booking));
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse updateForOwner(Long ownerId, Long bookingId, UpdateBookingRequest request) {
+        Business business = findOwnerBusiness(ownerId);
+        Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        return reschedule(booking, request);
     }
 
     @Override
@@ -167,14 +186,32 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, staffId));
     }
 
-    private void checkSlotIsFree(Business business, Staff staff, LocalDateTime startsAt, LocalDateTime endsAt) {
-        if (!isWithinOpeningHours(business.getId(), startsAt, endsAt)) {
-            throw new ConflictException(ErrorMessageKeys.OUTSIDE_OPENING_HOURS);
+    private BookingResponse reschedule(Booking booking, UpdateBookingRequest request) {
+        Business business = booking.getBusiness();
+        ServiceOffering service = findService(business, request.getServiceId());
+        Staff staff = findStaff(business, request.getStaffId());
+        checkOpeningHours(business, request.getStartsAt(), request.getEndsAt());
+        boolean staffBusy = bookingRepository.existsOverlappingBookingExcluding(
+                booking.getId(), staff.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
+        if (staffBusy) {
+            throw new ConflictException(ErrorMessageKeys.STAFF_NOT_AVAILABLE, staff.getName());
         }
+        booking.reschedule(service, staff, request.getStartsAt(), request.getEndsAt(), request.getNotes());
+        return bookingEntityToBookingResponse.toResponse(booking);
+    }
+
+    private void checkSlotIsFree(Business business, Staff staff, LocalDateTime startsAt, LocalDateTime endsAt) {
+        checkOpeningHours(business, startsAt, endsAt);
         boolean staffBusy = bookingRepository.existsOverlappingBooking(
                 staff.getId(), startsAt, endsAt, BookingStatus.CANCELLED);
         if (staffBusy) {
             throw new ConflictException(ErrorMessageKeys.STAFF_NOT_AVAILABLE, staff.getName());
+        }
+    }
+
+    private void checkOpeningHours(Business business, LocalDateTime startsAt, LocalDateTime endsAt) {
+        if (!isWithinOpeningHours(business.getId(), startsAt, endsAt)) {
+            throw new ConflictException(ErrorMessageKeys.OUTSIDE_OPENING_HOURS);
         }
     }
 

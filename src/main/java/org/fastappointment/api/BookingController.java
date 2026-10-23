@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.service.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,13 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createForCustomer(userId, request));
     }
 
+    @PutMapping("/bookings/{id}")
+    public ResponseEntity<BookingResponse> updateBooking(Authentication authentication, @PathVariable Long id,
+                                                         @Valid @RequestBody UpdateBookingRequest request) {
+        Long userId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(bookingService.updateForCustomer(userId, id, request));
+    }
+
     @DeleteMapping("/bookings/{id}")
     public ResponseEntity<Void> deleteBooking(Authentication authentication, @PathVariable Long id) {
         Long userId = Long.valueOf(authentication.getName());
@@ -53,6 +61,13 @@ public class BookingController {
                                                                  @Valid @RequestBody CreateBusinessBookingRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createForOwner(ownerId, request));
+    }
+
+    @PutMapping("/business/bookings/{id}")
+    public ResponseEntity<BookingResponse> updateBusinessBooking(Authentication authentication, @PathVariable Long id,
+                                                                 @Valid @RequestBody UpdateBookingRequest request) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(bookingService.updateForOwner(ownerId, id, request));
     }
 
     @DeleteMapping("/business/bookings/{id}")

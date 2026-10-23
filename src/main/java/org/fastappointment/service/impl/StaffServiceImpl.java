@@ -2,6 +2,7 @@ package org.fastappointment.service.impl;
 
 import org.fastappointment.api.dto.CreateStaffRequest;
 import org.fastappointment.api.dto.StaffResponse;
+import org.fastappointment.api.dto.UpdateStaffRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Staff;
 import org.fastappointment.exception.ErrorMessageKeys;
@@ -55,5 +56,16 @@ public class StaffServiceImpl implements StaffService {
                 .colorTag(request.getColorTag())
                 .build();
         return staffEntityToStaffResponse.toResponse(staffRepository.save(staff));
+    }
+
+    @Override
+    @Transactional
+    public StaffResponse update(Long ownerId, Long id, UpdateStaffRequest request) {
+        Business business = businessRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
+        Staff staff = staffRepository.findByIdAndBusinessId(id, business.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, id));
+        staff.update(request.getName(), request.getEmail(), request.getColorTag());
+        return staffEntityToStaffResponse.toResponse(staff);
     }
 }

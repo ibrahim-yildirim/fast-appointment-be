@@ -90,6 +90,14 @@ public class Booking extends BaseEntity {
         return notes;
     }
 
+    public void reschedule(ServiceOffering service, Staff staff, LocalDateTime startsAt, LocalDateTime endsAt, String notes) {
+        this.service = service;
+        this.staff = staff;
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
+        this.notes = notes;
+    }
+
     public static class Builder {
 
         private Business business;

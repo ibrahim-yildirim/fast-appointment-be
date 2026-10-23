@@ -3,6 +3,7 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.BusinessHoursRequest;
 import org.fastappointment.api.dto.BusinessResponse;
 import org.fastappointment.api.dto.CreateBusinessRequest;
+import org.fastappointment.api.dto.UpdateBusinessRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.BusinessHours;
 import org.fastappointment.exception.ConflictException;
@@ -16,6 +17,7 @@ import org.fastappointment.service.BusinessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -87,6 +89,31 @@ public class BusinessServiceImpl implements BusinessService {
         List<BusinessHours> savedHours = businessHoursRepository.saveAll(hours);
 
         return businessEntityToBusinessResponse.toResponse(savedBusiness, savedHours);
+    }
+
+    @Override
+    @Transactional
+    public BusinessResponse update(Long ownerId, UpdateBusinessRequest request) {
+        Business business = businessRepository.findByOwnerId(ownerId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
+        business.update(request.getName(), request.getDescription(), request.getTimezone(),
+                request.getAddress(), request.getPhone(), request.getEmail());
+
+        Map<DayOfWeek, BusinessHours> hoursByDay = businessHoursRepository.findByBusinessId(business.getId()).stream()
+                .collect(Collectors.toMap(BusinessHours::getDayOfWeek, hours -> hours));
+        List<BusinessHours> hours = request.getHours().stream()
+                .map(hoursRequest -> updateOrCreateHours(business, hoursByDay.get(hoursRequest.getDay()), hoursRequest))
+                .toList();
+
+        return businessEntityToBusinessResponse.toResponse(business, hours);
+    }
+
+    private BusinessHours updateOrCreateHours(Business business, BusinessHours existing, BusinessHoursRequest request) {
+        if (existing == null) {
+            return businessHoursRepository.save(toBusinessHours(business, request));
+        }
+        existing.update(request.getEnabled(), request.getStart(), request.getEnd());
+        return existing;
     }
 
     private BusinessHours toBusinessHours(Business business, BusinessHoursRequest request) {
