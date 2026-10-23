@@ -2,6 +2,7 @@ package org.fastappointment.api;
 
 import jakarta.validation.Valid;
 import org.fastappointment.api.dto.CreateStaffRequest;
+import org.fastappointment.api.dto.PublicStaffResponse;
 import org.fastappointment.api.dto.StaffResponse;
 import org.fastappointment.api.dto.UpdateStaffRequest;
 import org.fastappointment.service.StaffService;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/staff")
+@RequestMapping("/api")
 public class StaffController {
 
     private final StaffService staffService;
@@ -22,24 +23,19 @@ public class StaffController {
         this.staffService = staffService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<StaffResponse>> getAll() {
-        return ResponseEntity.ok().body(staffService.findAll());
+    @GetMapping("/businesses/{slug}/staff")
+    public ResponseEntity<List<PublicStaffResponse>> getAllByBusiness(@PathVariable String slug) {
+        return ResponseEntity.ok().body(staffService.findAllByBusinessSlug(slug));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<StaffResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(staffService.findById(id));
-    }
-
-    @PostMapping
+    @PostMapping("/staff")
     public ResponseEntity<StaffResponse> create(Authentication authentication,
                                                 @Valid @RequestBody CreateStaffRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(staffService.create(ownerId, request));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/staff/{id}")
     public ResponseEntity<StaffResponse> update(Authentication authentication, @PathVariable Long id,
                                                 @Valid @RequestBody UpdateStaffRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());

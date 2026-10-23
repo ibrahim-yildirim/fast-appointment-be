@@ -8,9 +8,7 @@ import java.util.List;
 
 public interface ServiceOfferingService {
 
-    List<ServiceOfferingResponse> findAll();
-
-    ServiceOfferingResponse findById(Long id);
+    List<ServiceOfferingResponse> findActiveByBusinessSlug(String slug);
 
     ServiceOfferingResponse create(Long ownerId, CreateServiceOfferingRequest request);
 

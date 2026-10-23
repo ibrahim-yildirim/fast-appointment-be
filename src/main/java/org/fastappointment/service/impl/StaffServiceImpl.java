@@ -1,12 +1,14 @@
 package org.fastappointment.service.impl;
 
 import org.fastappointment.api.dto.CreateStaffRequest;
+import org.fastappointment.api.dto.PublicStaffResponse;
 import org.fastappointment.api.dto.StaffResponse;
 import org.fastappointment.api.dto.UpdateStaffRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Staff;
 import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.NotFoundException;
+import org.fastappointment.mapper.StaffEntityToPublicStaffResponse;
 import org.fastappointment.mapper.StaffEntityToStaffResponse;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.StaffRepository;
@@ -22,26 +24,24 @@ public class StaffServiceImpl implements StaffService {
     private final StaffRepository staffRepository;
     private final BusinessRepository businessRepository;
     private final StaffEntityToStaffResponse staffEntityToStaffResponse;
+    private final StaffEntityToPublicStaffResponse staffEntityToPublicStaffResponse;
 
     public StaffServiceImpl(StaffRepository staffRepository, BusinessRepository businessRepository,
-                            StaffEntityToStaffResponse staffEntityToStaffResponse) {
+                            StaffEntityToStaffResponse staffEntityToStaffResponse,
+                            StaffEntityToPublicStaffResponse staffEntityToPublicStaffResponse) {
         this.staffRepository = staffRepository;
         this.businessRepository = businessRepository;
         this.staffEntityToStaffResponse = staffEntityToStaffResponse;
+        this.staffEntityToPublicStaffResponse = staffEntityToPublicStaffResponse;
     }
 
     @Override
-    public List<StaffResponse> findAll() {
-        return staffRepository.findAll().stream()
-                .map(staffEntityToStaffResponse::toResponse)
+    public List<PublicStaffResponse> findAllByBusinessSlug(String slug) {
+        Business business = businessRepository.findBySlug(slug)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, slug));
+        return staffRepository.findByBusinessId(business.getId()).stream()
+                .map(staffEntityToPublicStaffResponse::toResponse)
                 .toList();
-    }
-
-    @Override
-    public StaffResponse findById(Long id) {
-        return staffRepository.findById(id)
-                .map(staffEntityToStaffResponse::toResponse)
-                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, id));
     }
 
     @Override

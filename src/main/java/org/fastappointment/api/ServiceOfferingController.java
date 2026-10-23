@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/services")
+@RequestMapping("/api")
 public class ServiceOfferingController {
 
     private final ServiceOfferingService serviceOfferingService;
@@ -22,24 +22,19 @@ public class ServiceOfferingController {
         this.serviceOfferingService = serviceOfferingService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<ServiceOfferingResponse>> getAll() {
-        return ResponseEntity.ok().body(serviceOfferingService.findAll());
+    @GetMapping("/businesses/{slug}/services")
+    public ResponseEntity<List<ServiceOfferingResponse>> getActiveByBusiness(@PathVariable String slug) {
+        return ResponseEntity.ok().body(serviceOfferingService.findActiveByBusinessSlug(slug));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ServiceOfferingResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(serviceOfferingService.findById(id));
-    }
-
-    @PostMapping
+    @PostMapping("/services")
     public ResponseEntity<ServiceOfferingResponse> create(Authentication authentication,
                                                           @Valid @RequestBody CreateServiceOfferingRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(serviceOfferingService.create(ownerId, request));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/services/{id}")
     public ResponseEntity<ServiceOfferingResponse> update(Authentication authentication, @PathVariable Long id,
                                                           @Valid @RequestBody UpdateServiceOfferingRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());

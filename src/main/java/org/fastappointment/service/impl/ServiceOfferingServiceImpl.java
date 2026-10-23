@@ -32,17 +32,12 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     }
 
     @Override
-    public List<ServiceOfferingResponse> findAll() {
-        return serviceOfferingRepository.findAll().stream()
+    public List<ServiceOfferingResponse> findActiveByBusinessSlug(String slug) {
+        Business business = businessRepository.findBySlug(slug)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, slug));
+        return serviceOfferingRepository.findByBusinessIdAndActiveTrue(business.getId()).stream()
                 .map(serviceOfferingEntityToServiceOfferingResponse::toResponse)
                 .toList();
-    }
-
-    @Override
-    public ServiceOfferingResponse findById(Long id) {
-        return serviceOfferingRepository.findById(id)
-                .map(serviceOfferingEntityToServiceOfferingResponse::toResponse)
-                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.SERVICE_NOT_FOUND, id));
     }
 
     @Override

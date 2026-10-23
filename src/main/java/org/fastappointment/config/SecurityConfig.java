@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/business/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/businesses/**", "/api/services/**", "/api/staff/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/businesses/**").permitAll()
                         .requestMatchers("/api/customers/me").hasRole("CUSTOMER")
                         .requestMatchers("/api/customers/**").hasRole("BUSINESS_OWNER")
                         .requestMatchers(HttpMethod.POST, "/api/businesses", "/api/services", "/api/staff").hasRole("BUSINESS_OWNER")
