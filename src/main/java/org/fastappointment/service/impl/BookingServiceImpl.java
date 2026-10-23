@@ -70,6 +70,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
+        checkStaffOffersService(staff, service);
         checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
 
         Booking booking = Booking.builder()
@@ -96,11 +97,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public void deleteForCustomer(Long userId, Long bookingId) {
+    public void cancelForCustomer(Long userId, Long bookingId) {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
-        bookingRepository.delete(booking);
+        booking.cancel();
     }
 
     @Override
@@ -117,6 +118,7 @@ public class BookingServiceImpl implements BookingService {
         Business business = findOwnerBusiness(ownerId);
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
+        checkStaffOffersService(staff, service);
         checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
         Customer customer = findOrCreateBusinessCustomer(business, request);
 
@@ -144,11 +146,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public void deleteForOwner(Long ownerId, Long bookingId) {
+    public void cancelForOwner(Long ownerId, Long bookingId) {
         Business business = findOwnerBusiness(ownerId);
         Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
-        bookingRepository.delete(booking);
+        booking.cancel();
     }
 
     private Customer findCustomer(Long userId) {
@@ -177,12 +179,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private ServiceOffering findService(Business business, Long serviceId) {
-        return serviceOfferingRepository.findByIdAndBusinessId(serviceId, business.getId())
+        return serviceOfferingRepository.findByIdAndBusinessIdAndActiveTrue(serviceId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.SERVICE_NOT_FOUND, serviceId));
     }
 
     private Staff findStaff(Business business, Long staffId) {
-        return staffRepository.findByIdAndBusinessId(staffId, business.getId())
+        return staffRepository.findByIdAndBusinessIdAndActiveTrue(staffId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.STAFF_NOT_FOUND, staffId));
     }
 
@@ -190,6 +192,7 @@ public class BookingServiceImpl implements BookingService {
         Business business = booking.getBusiness();
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
+        checkStaffOffersService(staff, service);
         checkOpeningHours(business, request.getStartsAt(), request.getEndsAt());
         boolean staffBusy = bookingRepository.existsOverlappingBookingExcluding(
                 booking.getId(), staff.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
@@ -198,6 +201,12 @@ public class BookingServiceImpl implements BookingService {
         }
         booking.reschedule(service, staff, request.getStartsAt(), request.getEndsAt(), request.getNotes());
         return bookingEntityToBookingResponse.toResponse(booking);
+    }
+
+    private void checkStaffOffersService(Staff staff, ServiceOffering service) {
+        if (!service.getEligibleStaff().contains(staff)) {
+            throw new ConflictException(ErrorMessageKeys.STAFF_NOT_ELIGIBLE, staff.getName(), service.getName());
+        }
     }
 
     private void checkSlotIsFree(Business business, Staff staff, LocalDateTime startsAt, LocalDateTime endsAt) {

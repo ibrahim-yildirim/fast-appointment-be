@@ -10,7 +10,11 @@ public interface ServiceOfferingService {
 
     List<ServiceOfferingResponse> findActiveByBusinessSlug(String slug);
 
+    List<ServiceOfferingResponse> findAllForOwner(Long ownerId);
+
     ServiceOfferingResponse create(Long ownerId, CreateServiceOfferingRequest request);
 
     ServiceOfferingResponse update(Long ownerId, Long id, UpdateServiceOfferingRequest request);
+
+    void deactivate(Long ownerId, Long id);
 }

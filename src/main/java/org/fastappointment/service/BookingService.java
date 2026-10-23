@@ -15,7 +15,7 @@ public interface BookingService {
 
     BookingResponse updateForCustomer(Long userId, Long bookingId, UpdateBookingRequest request);
 
-    void deleteForCustomer(Long userId, Long bookingId);
+    void cancelForCustomer(Long userId, Long bookingId);
 
     List<BookingResponse> findAllForOwner(Long ownerId);
 
@@ -23,5 +23,5 @@ public interface BookingService {
 
     BookingResponse updateForOwner(Long ownerId, Long bookingId, UpdateBookingRequest request);
 
-    void deleteForOwner(Long ownerId, Long bookingId);
+    void cancelForOwner(Long ownerId, Long bookingId);
 }

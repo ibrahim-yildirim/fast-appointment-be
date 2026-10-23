@@ -44,9 +44,9 @@ public class BookingController {
     }
 
     @DeleteMapping("/bookings/{id}")
-    public ResponseEntity<Void> deleteBooking(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> cancelBooking(Authentication authentication, @PathVariable Long id) {
         Long userId = Long.valueOf(authentication.getName());
-        bookingService.deleteForCustomer(userId, id);
+        bookingService.cancelForCustomer(userId, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -71,9 +71,9 @@ public class BookingController {
     }
 
     @DeleteMapping("/business/bookings/{id}")
-    public ResponseEntity<Void> deleteBusinessBooking(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> cancelBusinessBooking(Authentication authentication, @PathVariable Long id) {
         Long ownerId = Long.valueOf(authentication.getName());
-        bookingService.deleteForOwner(ownerId, id);
+        bookingService.cancelForOwner(ownerId, id);
         return ResponseEntity.noContent().build();
     }
 }

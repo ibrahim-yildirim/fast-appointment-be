@@ -28,6 +28,12 @@ public class StaffController {
         return ResponseEntity.ok().body(staffService.findAllByBusinessSlug(slug));
     }
 
+    @GetMapping("/business/staff")
+    public ResponseEntity<List<StaffResponse>> getAllForOwner(Authentication authentication) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(staffService.findAllForOwner(ownerId));
+    }
+
     @PostMapping("/staff")
     public ResponseEntity<StaffResponse> create(Authentication authentication,
                                                 @Valid @RequestBody CreateStaffRequest request) {
@@ -40,5 +46,12 @@ public class StaffController {
                                                 @Valid @RequestBody UpdateStaffRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok().body(staffService.update(ownerId, id, request));
+    }
+
+    @DeleteMapping("/staff/{id}")
+    public ResponseEntity<Void> deactivate(Authentication authentication, @PathVariable Long id) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        staffService.deactivate(ownerId, id);
+        return ResponseEntity.noContent().build();
     }
 }

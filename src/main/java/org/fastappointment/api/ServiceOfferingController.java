@@ -27,6 +27,12 @@ public class ServiceOfferingController {
         return ResponseEntity.ok().body(serviceOfferingService.findActiveByBusinessSlug(slug));
     }
 
+    @GetMapping("/business/services")
+    public ResponseEntity<List<ServiceOfferingResponse>> getAllForOwner(Authentication authentication) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(serviceOfferingService.findAllForOwner(ownerId));
+    }
+
     @PostMapping("/services")
     public ResponseEntity<ServiceOfferingResponse> create(Authentication authentication,
                                                           @Valid @RequestBody CreateServiceOfferingRequest request) {
@@ -39,5 +45,12 @@ public class ServiceOfferingController {
                                                           @Valid @RequestBody UpdateServiceOfferingRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok().body(serviceOfferingService.update(ownerId, id, request));
+    }
+
+    @DeleteMapping("/services/{id}")
+    public ResponseEntity<Void> deactivate(Authentication authentication, @PathVariable Long id) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        serviceOfferingService.deactivate(ownerId, id);
+        return ResponseEntity.noContent().build();
     }
 }
