@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface SlotService {
 
-    List<SlotResponse> findAvailableSlots(String slug, Long serviceId, SlotSearchRequest request);
+    List<SlotResponse> findSlots(String slug, Long serviceId, SlotSearchRequest request, Long customerUserId);
 }

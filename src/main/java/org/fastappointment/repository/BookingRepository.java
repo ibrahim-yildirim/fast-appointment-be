@@ -42,6 +42,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                       @Param("endsAt") LocalDateTime endsAt,
                                                       @Param("ignoredStatus") BookingStatus ignoredStatus);
 
+    @Query("select b from Booking b where b.customer.id = :customerId and b.status <> :ignoredStatus and b.startsAt < :to and b.endsAt > :from")
+    List<Booking> findActiveForCustomerBetween(@Param("customerId") Long customerId,
+                                               @Param("from") LocalDateTime from,
+                                               @Param("to") LocalDateTime to,
+                                               @Param("ignoredStatus") BookingStatus ignoredStatus);
+
     @Query("select b from Booking b where b.staff.id in :staffIds and b.status <> :ignoredStatus and b.startsAt < :to and b.endsAt > :from")
     List<Booking> findActiveForStaffBetween(@Param("staffIds") Collection<Long> staffIds,
                                             @Param("from") LocalDateTime from,
