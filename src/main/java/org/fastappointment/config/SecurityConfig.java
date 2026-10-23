@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/businesses/**", "/api/services/**", "/api/staff/**").permitAll()
                         .requestMatchers("/api/customers/**").hasRole("BUSINESS_OWNER")
                         .requestMatchers(HttpMethod.POST, "/api/businesses", "/api/services", "/api/staff").hasRole("BUSINESS_OWNER")
+                        .requestMatchers("/api/business/bookings/**").hasRole("BUSINESS_OWNER")
+                        .requestMatchers("/api/bookings/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();

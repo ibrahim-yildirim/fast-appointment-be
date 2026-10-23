@@ -16,8 +16,6 @@ public class CreateBookingRequest {
     @NotNull
     private Long staffId;
 
-    private Long customerId;
-
     @NotNull
     private LocalDateTime startsAt;
 
@@ -56,14 +54,6 @@ public class CreateBookingRequest {
 
     public void setStaffId(Long staffId) {
         this.staffId = staffId;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
     }
 
     public LocalDateTime getStartsAt() {
