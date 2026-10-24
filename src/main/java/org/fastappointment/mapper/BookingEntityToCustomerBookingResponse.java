@@ -21,7 +21,9 @@ public class BookingEntityToCustomerBookingResponse {
                 booking.getEndsAt(),
                 booking.getStatus(),
                 booking.getService().getPrice(),
-                booking.getNotes()
+                booking.getNotes(),
+                booking.getCancelledBy(),
+                booking.getCancellationReason()
         );
     }
 }

@@ -1,12 +1,14 @@
 package org.fastappointment.service.impl;
 
 import org.fastappointment.api.dto.BookingResponse;
+import org.fastappointment.api.dto.CancelBookingRequest;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
 import org.fastappointment.api.dto.CustomerBookingResponse;
 import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.entity.concretes.Booking;
 import org.fastappointment.entity.enums.BookingStatus;
+import org.fastappointment.entity.enums.CancelledBy;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.BusinessHours;
 import org.fastappointment.entity.concretes.Customer;
@@ -104,11 +106,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public void cancelForCustomer(Long userId, Long bookingId) {
+    public void cancelForCustomer(Long userId, Long bookingId, CancelBookingRequest request) {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
-        booking.cancel();
+        booking.cancel(CancelledBy.CUSTOMER, cancellationReason(request));
     }
 
     @Override
@@ -154,11 +156,18 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public void cancelForOwner(Long ownerId, Long bookingId) {
+    public void cancelForOwner(Long ownerId, Long bookingId, CancelBookingRequest request) {
         Business business = findOwnerBusiness(ownerId);
         Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
-        booking.cancel();
+        booking.cancel(CancelledBy.BUSINESS, cancellationReason(request));
+    }
+
+    private String cancellationReason(CancelBookingRequest request) {
+        if (request == null || request.getReason() == null || request.getReason().isBlank()) {
+            return null;
+        }
+        return request.getReason().trim();
     }
 
     private Customer findCustomer(Long userId) {

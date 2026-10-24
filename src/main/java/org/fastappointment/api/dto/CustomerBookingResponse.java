@@ -1,6 +1,7 @@
 package org.fastappointment.api.dto;
 
 import org.fastappointment.entity.enums.BookingStatus;
+import org.fastappointment.entity.enums.CancelledBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,11 +21,14 @@ public class CustomerBookingResponse {
     private final BookingStatus status;
     private final BigDecimal price;
     private final String notes;
+    private final CancelledBy cancelledBy;
+    private final String cancellationReason;
 
     public CustomerBookingResponse(Long id, Long businessId, String businessName, String businessSlug,
                                    Long serviceId, String serviceName, Long staffId, String staffName,
                                    LocalDateTime startsAt, LocalDateTime endsAt, BookingStatus status,
-                                   BigDecimal price, String notes) {
+                                   BigDecimal price, String notes, CancelledBy cancelledBy,
+                                   String cancellationReason) {
         this.id = id;
         this.businessId = businessId;
         this.businessName = businessName;
@@ -38,6 +42,8 @@ public class CustomerBookingResponse {
         this.status = status;
         this.price = price;
         this.notes = notes;
+        this.cancelledBy = cancelledBy;
+        this.cancellationReason = cancellationReason;
     }
 
     public Long getId() {
@@ -90,5 +96,13 @@ public class CustomerBookingResponse {
 
     public String getNotes() {
         return notes;
+    }
+
+    public CancelledBy getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
     }
 }

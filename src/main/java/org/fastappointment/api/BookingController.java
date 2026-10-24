@@ -2,6 +2,7 @@ package org.fastappointment.api;
 
 import jakarta.validation.Valid;
 import org.fastappointment.api.dto.BookingResponse;
+import org.fastappointment.api.dto.CancelBookingRequest;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
 import org.fastappointment.api.dto.CustomerBookingResponse;
@@ -45,9 +46,10 @@ public class BookingController {
     }
 
     @DeleteMapping("/bookings/{id}")
-    public ResponseEntity<Void> cancelBooking(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> cancelBooking(Authentication authentication, @PathVariable Long id,
+                                              @Valid @RequestBody(required = false) CancelBookingRequest request) {
         Long userId = Long.valueOf(authentication.getName());
-        bookingService.cancelForCustomer(userId, id);
+        bookingService.cancelForCustomer(userId, id, request);
         return ResponseEntity.noContent().build();
     }
 
@@ -72,9 +74,10 @@ public class BookingController {
     }
 
     @DeleteMapping("/business/bookings/{id}")
-    public ResponseEntity<Void> cancelBusinessBooking(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Void> cancelBusinessBooking(Authentication authentication, @PathVariable Long id,
+                                                      @Valid @RequestBody(required = false) CancelBookingRequest request) {
         Long ownerId = Long.valueOf(authentication.getName());
-        bookingService.cancelForOwner(ownerId, id);
+        bookingService.cancelForOwner(ownerId, id, request);
         return ResponseEntity.noContent().build();
     }
 }

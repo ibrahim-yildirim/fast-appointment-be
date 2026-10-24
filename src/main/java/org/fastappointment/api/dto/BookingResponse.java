@@ -1,6 +1,7 @@
 package org.fastappointment.api.dto;
 
 import org.fastappointment.entity.enums.BookingStatus;
+import org.fastappointment.entity.enums.CancelledBy;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +16,12 @@ public class BookingResponse {
     private final LocalDateTime endsAt;
     private final BookingStatus status;
     private final String notes;
+    private final CancelledBy cancelledBy;
+    private final String cancellationReason;
 
     public BookingResponse(Long id, Long businessId, Long serviceId, Long staffId, Long customerId,
-                           LocalDateTime startsAt, LocalDateTime endsAt, BookingStatus status, String notes) {
+                           LocalDateTime startsAt, LocalDateTime endsAt, BookingStatus status, String notes,
+                           CancelledBy cancelledBy, String cancellationReason) {
         this.id = id;
         this.businessId = businessId;
         this.serviceId = serviceId;
@@ -27,6 +31,8 @@ public class BookingResponse {
         this.endsAt = endsAt;
         this.status = status;
         this.notes = notes;
+        this.cancelledBy = cancelledBy;
+        this.cancellationReason = cancellationReason;
     }
 
     public Long getId() {
@@ -63,5 +69,13 @@ public class BookingResponse {
 
     public String getNotes() {
         return notes;
+    }
+
+    public CancelledBy getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
     }
 }

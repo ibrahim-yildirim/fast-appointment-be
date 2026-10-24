@@ -3,6 +3,7 @@ package org.fastappointment.entity.concretes;
 import jakarta.persistence.*;
 import org.fastappointment.entity.abstracts.BaseEntity;
 import org.fastappointment.entity.enums.BookingStatus;
+import org.fastappointment.entity.enums.CancelledBy;
 
 import java.time.LocalDateTime;
 
@@ -35,6 +36,12 @@ public class Booking extends BaseEntity {
 
     @Column(columnDefinition = "text")
     private String notes;
+
+    @Enumerated(EnumType.STRING)
+    private CancelledBy cancelledBy;
+
+    @Column(columnDefinition = "text")
+    private String cancellationReason;
 
     protected Booking() {
     }
@@ -90,6 +97,14 @@ public class Booking extends BaseEntity {
         return notes;
     }
 
+    public CancelledBy getCancelledBy() {
+        return cancelledBy;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
     public void reschedule(ServiceOffering service, Staff staff, LocalDateTime startsAt, LocalDateTime endsAt, String notes) {
         this.service = service;
         this.staff = staff;
@@ -98,8 +113,10 @@ public class Booking extends BaseEntity {
         this.notes = notes;
     }
 
-    public void cancel() {
+    public void cancel(CancelledBy cancelledBy, String reason) {
         this.status = BookingStatus.CANCELLED;
+        this.cancelledBy = cancelledBy;
+        this.cancellationReason = reason;
     }
 
     public static class Builder {

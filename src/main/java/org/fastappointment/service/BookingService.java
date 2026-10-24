@@ -1,6 +1,7 @@
 package org.fastappointment.service;
 
 import org.fastappointment.api.dto.BookingResponse;
+import org.fastappointment.api.dto.CancelBookingRequest;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
 import org.fastappointment.api.dto.CustomerBookingResponse;
@@ -16,7 +17,7 @@ public interface BookingService {
 
     CustomerBookingResponse updateForCustomer(Long userId, Long bookingId, UpdateBookingRequest request);
 
-    void cancelForCustomer(Long userId, Long bookingId);
+    void cancelForCustomer(Long userId, Long bookingId, CancelBookingRequest request);
 
     List<BookingResponse> findAllForOwner(Long ownerId);
 
@@ -24,5 +25,5 @@ public interface BookingService {
 
     BookingResponse updateForOwner(Long ownerId, Long bookingId, UpdateBookingRequest request);
 
-    void cancelForOwner(Long ownerId, Long bookingId);
+    void cancelForOwner(Long ownerId, Long bookingId, CancelBookingRequest request);
 }
