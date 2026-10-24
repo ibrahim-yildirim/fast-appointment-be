@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -161,6 +162,23 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
         booking.cancel(CancelledBy.BUSINESS, cancellationReason(request));
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse markNoShowForOwner(Long ownerId, Long bookingId) {
+        Business business = findOwnerBusiness(ownerId);
+        Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new ConflictException(ErrorMessageKeys.NO_SHOW_NOT_CONFIRMED);
+        }
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(business.getTimezone()));
+        if (booking.getStartsAt().isAfter(now)) {
+            throw new ConflictException(ErrorMessageKeys.NO_SHOW_TOO_EARLY);
+        }
+        booking.markNoShow();
+        return bookingEntityToBookingResponse.toResponse(booking);
     }
 
     private String cancellationReason(CancelBookingRequest request) {

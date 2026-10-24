@@ -26,4 +26,6 @@ public interface BookingService {
     BookingResponse updateForOwner(Long ownerId, Long bookingId, UpdateBookingRequest request);
 
     void cancelForOwner(Long ownerId, Long bookingId, CancelBookingRequest request);
+
+    BookingResponse markNoShowForOwner(Long ownerId, Long bookingId);
 }

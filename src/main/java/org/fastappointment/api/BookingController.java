@@ -80,4 +80,10 @@ public class BookingController {
         bookingService.cancelForOwner(ownerId, id, request);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/business/bookings/{id}/no-show")
+    public ResponseEntity<BookingResponse> markNoShow(Authentication authentication, @PathVariable Long id) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(bookingService.markNoShowForOwner(ownerId, id));
+    }
 }

@@ -119,6 +119,10 @@ public class Booking extends BaseEntity {
         this.cancellationReason = reason;
     }
 
+    public void markNoShow() {
+        this.status = BookingStatus.NO_SHOW;
+    }
+
     public static class Builder {
 
         private Business business;
