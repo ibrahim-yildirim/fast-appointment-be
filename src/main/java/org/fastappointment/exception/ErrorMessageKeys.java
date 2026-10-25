@@ -17,6 +17,8 @@ public final class ErrorMessageKeys {
     public static final String OUTSIDE_OPENING_HOURS = "error.booking.outsideOpeningHours";
     public static final String NO_SHOW_NOT_CONFIRMED = "error.booking.noShowNotConfirmed";
     public static final String NO_SHOW_TOO_EARLY = "error.booking.noShowTooEarly";
+    public static final String BOOKING_IN_THE_PAST = "error.booking.inThePast";
+    public static final String GUEST_LIMIT_REACHED = "error.booking.guestLimitReached";
     public static final String EMAIL_TAKEN = "error.auth.emailTaken";
     public static final String INVALID_CREDENTIALS = "error.auth.invalidCredentials";
     public static final String INVALID_REFRESH_TOKEN = "error.auth.invalidRefreshToken";

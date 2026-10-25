@@ -5,6 +5,7 @@ import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CancelBookingRequest;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.CreateGuestBookingRequest;
 import org.fastappointment.api.dto.CustomerBookingResponse;
 import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.service.BookingService;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -85,5 +87,23 @@ public class BookingController {
     public ResponseEntity<BookingResponse> markNoShow(Authentication authentication, @PathVariable Long id) {
         Long ownerId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok().body(bookingService.markNoShowForOwner(ownerId, id));
+    }
+
+    @PostMapping("/businesses/{slug}/bookings")
+    public ResponseEntity<CustomerBookingResponse> createGuestBooking(@PathVariable String slug,
+                                                                      @Valid @RequestBody CreateGuestBookingRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createForGuest(slug, request));
+    }
+
+    @GetMapping("/bookings/manage/{uid}")
+    public ResponseEntity<CustomerBookingResponse> getGuestBooking(@PathVariable UUID uid) {
+        return ResponseEntity.ok(bookingService.findByUid(uid));
+    }
+
+    @DeleteMapping("/bookings/manage/{uid}")
+    public ResponseEntity<Void> cancelGuestBooking(@PathVariable UUID uid,
+                                                   @Valid @RequestBody(required = false) CancelBookingRequest request) {
+        bookingService.cancelByUid(uid, request);
+        return ResponseEntity.noContent().build();
     }
 }

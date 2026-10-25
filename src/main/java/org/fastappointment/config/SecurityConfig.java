@@ -46,8 +46,11 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/business/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/businesses/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/businesses/*/bookings").permitAll()
+                        .requestMatchers("/api/bookings/manage/**").permitAll()
                         .requestMatchers("/api/customers/me").hasRole("CUSTOMER")
                         .requestMatchers("/api/customers/**").hasRole("BUSINESS_OWNER")
                         .requestMatchers(HttpMethod.POST, "/api/businesses", "/api/services", "/api/staff").hasRole("BUSINESS_OWNER")

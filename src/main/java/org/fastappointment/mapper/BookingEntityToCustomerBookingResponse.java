@@ -10,6 +10,7 @@ public class BookingEntityToCustomerBookingResponse {
     public CustomerBookingResponse toResponse(Booking booking) {
         return new CustomerBookingResponse(
                 booking.getId(),
+                booking.getUid(),
                 booking.getBusiness().getId(),
                 booking.getBusiness().getName(),
                 booking.getBusiness().getSlug(),

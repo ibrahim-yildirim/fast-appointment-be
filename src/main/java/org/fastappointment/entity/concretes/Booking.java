@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import org.fastappointment.entity.abstracts.BaseEntity;
 import org.fastappointment.entity.enums.BookingStatus;
 import org.fastappointment.entity.enums.CancelledBy;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "bookings")
@@ -14,6 +16,10 @@ public class Booking extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    @ColumnDefault("gen_random_uuid()")
+    private UUID uid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Business business;
@@ -47,6 +53,7 @@ public class Booking extends BaseEntity {
     }
 
     private Booking(Builder builder) {
+        this.uid = UUID.randomUUID();
         this.business = builder.business;
         this.service = builder.service;
         this.staff = builder.staff;
@@ -63,6 +70,10 @@ public class Booking extends BaseEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public UUID getUid() {
+        return uid;
     }
 
     public Business getBusiness() {

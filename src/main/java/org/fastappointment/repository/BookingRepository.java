@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -22,6 +23,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByIdAndCustomerId(Long id, Long customerId);
 
     Optional<Booking> findByIdAndBusinessId(Long id, Long businessId);
+
+    @EntityGraph(attributePaths = {"business", "service", "staff"})
+    Optional<Booking> findByUid(UUID uid);
+
+    long countByCustomerIdAndStatusAndStartsAtAfter(Long customerId, BookingStatus status, LocalDateTime after);
 
     @Query("select count(b) > 0 from Booking b where b.staff.id = :staffId and b.status <> :ignoredStatus and b.startsAt < :endsAt and b.endsAt > :startsAt")
     boolean existsOverlappingBooking(@Param("staffId") Long staffId,

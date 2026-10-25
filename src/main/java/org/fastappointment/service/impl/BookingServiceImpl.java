@@ -4,6 +4,7 @@ import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CancelBookingRequest;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.CreateGuestBookingRequest;
 import org.fastappointment.api.dto.CustomerBookingResponse;
 import org.fastappointment.api.dto.UpdateBookingRequest;
 import org.fastappointment.entity.concretes.Booking;
@@ -34,9 +35,12 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class BookingServiceImpl implements BookingService {
+
+    private static final int GUEST_UPCOMING_BOOKING_LIMIT = 2;
 
     private final BookingRepository bookingRepository;
     private final BusinessRepository businessRepository;
@@ -130,7 +134,8 @@ public class BookingServiceImpl implements BookingService {
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
         checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
-        Customer customer = findOrCreateBusinessCustomer(business, request);
+        Customer customer = findOrCreateBusinessCustomer(business, request.getCustomerName(),
+                request.getCustomerPhone(), request.getCustomerEmail());
         checkCustomerIsFree(customer, request.getStartsAt(), request.getEndsAt());
 
         Booking booking = Booking.builder()
@@ -181,6 +186,67 @@ public class BookingServiceImpl implements BookingService {
         return bookingEntityToBookingResponse.toResponse(booking);
     }
 
+    @Override
+    @Transactional
+    public CustomerBookingResponse createForGuest(String slug, CreateGuestBookingRequest request) {
+        Business business = businessRepository.findBySlug(slug)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, slug));
+        ServiceOffering service = findService(business, request.getServiceId());
+        Staff staff = findStaff(business, request.getStaffId());
+        checkStaffOffersService(staff, service);
+        checkNotInPast(business, request.getStartsAt());
+        LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
+        checkSlotIsFree(business, staff, request.getStartsAt(), endsAt);
+        Customer customer = findOrCreateBusinessCustomer(business, request.getCustomerName(),
+                request.getCustomerPhone(), request.getCustomerEmail());
+        checkGuestLimit(business, customer);
+        checkCustomerIsFree(customer, request.getStartsAt(), endsAt);
+
+        Booking booking = Booking.builder()
+                .business(business)
+                .service(service)
+                .staff(staff)
+                .customer(customer)
+                .startsAt(request.getStartsAt())
+                .endsAt(endsAt)
+                .status(BookingStatus.CONFIRMED)
+                .notes(request.getNotes())
+                .build();
+        return bookingEntityToCustomerBookingResponse.toResponse(bookingRepository.save(booking));
+    }
+
+    @Override
+    public CustomerBookingResponse findByUid(UUID uid) {
+        return bookingEntityToCustomerBookingResponse.toResponse(findBookingByUid(uid));
+    }
+
+    @Override
+    @Transactional
+    public void cancelByUid(UUID uid, CancelBookingRequest request) {
+        findBookingByUid(uid).cancel(CancelledBy.CUSTOMER, cancellationReason(request));
+    }
+
+    private Booking findBookingByUid(UUID uid) {
+        return bookingRepository.findByUid(uid)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, uid));
+    }
+
+    private void checkNotInPast(Business business, LocalDateTime startsAt) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(business.getTimezone()));
+        if (!startsAt.isAfter(now)) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_IN_THE_PAST);
+        }
+    }
+
+    private void checkGuestLimit(Business business, Customer customer) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(business.getTimezone()));
+        long upcoming = bookingRepository.countByCustomerIdAndStatusAndStartsAtAfter(
+                customer.getId(), BookingStatus.CONFIRMED, now);
+        if (upcoming >= GUEST_UPCOMING_BOOKING_LIMIT) {
+            throw new ConflictException(ErrorMessageKeys.GUEST_LIMIT_REACHED, GUEST_UPCOMING_BOOKING_LIMIT);
+        }
+    }
+
     private String cancellationReason(CancelBookingRequest request) {
         if (request == null || request.getReason() == null || request.getReason().isBlank()) {
             return null;
@@ -198,14 +264,14 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
     }
 
-    private Customer findOrCreateBusinessCustomer(Business business, CreateBusinessBookingRequest request) {
-        String phone = normalizePhone(request.getCustomerPhone());
+    private Customer findOrCreateBusinessCustomer(Business business, String name, String rawPhone, String email) {
+        String phone = normalizePhone(rawPhone);
         return customerRepository.findByBusinessIdAndPhone(business.getId(), phone)
                 .orElseGet(() -> customerRepository.save(Customer.builder()
                         .business(business)
-                        .name(request.getCustomerName())
+                        .name(name)
                         .phone(phone)
-                        .email(request.getCustomerEmail())
+                        .email(email)
                         .build()));
     }
 

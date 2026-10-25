@@ -4,10 +4,12 @@ import org.fastappointment.api.dto.BookingResponse;
 import org.fastappointment.api.dto.CancelBookingRequest;
 import org.fastappointment.api.dto.CreateBookingRequest;
 import org.fastappointment.api.dto.CreateBusinessBookingRequest;
+import org.fastappointment.api.dto.CreateGuestBookingRequest;
 import org.fastappointment.api.dto.CustomerBookingResponse;
 import org.fastappointment.api.dto.UpdateBookingRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface BookingService {
 
@@ -28,4 +30,10 @@ public interface BookingService {
     void cancelForOwner(Long ownerId, Long bookingId, CancelBookingRequest request);
 
     BookingResponse markNoShowForOwner(Long ownerId, Long bookingId);
+
+    CustomerBookingResponse createForGuest(String slug, CreateGuestBookingRequest request);
+
+    CustomerBookingResponse findByUid(UUID uid);
+
+    void cancelByUid(UUID uid, CancelBookingRequest request);
 }

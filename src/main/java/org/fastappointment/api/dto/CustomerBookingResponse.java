@@ -5,10 +5,12 @@ import org.fastappointment.entity.enums.CancelledBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class CustomerBookingResponse {
 
     private final Long id;
+    private final UUID uid;
     private final Long businessId;
     private final String businessName;
     private final String businessSlug;
@@ -24,12 +26,13 @@ public class CustomerBookingResponse {
     private final CancelledBy cancelledBy;
     private final String cancellationReason;
 
-    public CustomerBookingResponse(Long id, Long businessId, String businessName, String businessSlug,
+    public CustomerBookingResponse(Long id, UUID uid, Long businessId, String businessName, String businessSlug,
                                    Long serviceId, String serviceName, Long staffId, String staffName,
                                    LocalDateTime startsAt, LocalDateTime endsAt, BookingStatus status,
                                    BigDecimal price, String notes, CancelledBy cancelledBy,
                                    String cancellationReason) {
         this.id = id;
+        this.uid = uid;
         this.businessId = businessId;
         this.businessName = businessName;
         this.businessSlug = businessSlug;
@@ -48,6 +51,10 @@ public class CustomerBookingResponse {
 
     public Long getId() {
         return id;
+    }
+
+    public UUID getUid() {
+        return uid;
     }
 
     public Long getBusinessId() {
