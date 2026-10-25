@@ -294,6 +294,7 @@ public class BookingServiceImpl implements BookingService {
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
         checkOpeningHours(business, request.getStartsAt(), request.getEndsAt());
+        staffRepository.lockById(staff.getId());
         boolean staffBusy = bookingRepository.existsOverlappingBookingExcluding(
                 booking.getId(), staff.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
         if (staffBusy) {
@@ -325,6 +326,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkSlotIsFree(Business business, Staff staff, LocalDateTime startsAt, LocalDateTime endsAt) {
         checkOpeningHours(business, startsAt, endsAt);
+        staffRepository.lockById(staff.getId());
         boolean staffBusy = bookingRepository.existsOverlappingBooking(
                 staff.getId(), startsAt, endsAt, BookingStatus.CANCELLED);
         if (staffBusy) {
