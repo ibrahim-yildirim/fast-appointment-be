@@ -3,6 +3,7 @@ package org.fastappointment.api;
 import jakarta.validation.Valid;
 import org.fastappointment.api.dto.AuthResponse;
 import org.fastappointment.api.dto.LoginRequest;
+import org.fastappointment.api.dto.RefreshTokenRequest;
 import org.fastappointment.api.dto.RegisterRequest;
 import org.fastappointment.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -40,5 +41,16 @@ public class AuthController {
     @PostMapping("/business/auth/login")
     public ResponseEntity<AuthResponse> loginBusinessOwner(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.loginBusinessOwner(request));
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 }

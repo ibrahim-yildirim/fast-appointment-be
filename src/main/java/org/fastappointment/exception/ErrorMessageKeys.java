@@ -19,6 +19,7 @@ public final class ErrorMessageKeys {
     public static final String NO_SHOW_TOO_EARLY = "error.booking.noShowTooEarly";
     public static final String EMAIL_TAKEN = "error.auth.emailTaken";
     public static final String INVALID_CREDENTIALS = "error.auth.invalidCredentials";
+    public static final String INVALID_REFRESH_TOKEN = "error.auth.invalidRefreshToken";
     public static final String VALIDATION_FAILED = "error.validation.failed";
     public static final String MALFORMED_REQUEST = "error.request.malformed";
 

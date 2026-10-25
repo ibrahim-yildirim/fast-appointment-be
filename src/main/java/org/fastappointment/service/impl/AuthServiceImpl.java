@@ -2,6 +2,7 @@ package org.fastappointment.service.impl;
 
 import org.fastappointment.api.dto.AuthResponse;
 import org.fastappointment.api.dto.LoginRequest;
+import org.fastappointment.api.dto.RefreshTokenRequest;
 import org.fastappointment.api.dto.RegisterRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Customer;
@@ -60,15 +61,37 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse loginCustomer(LoginRequest request) {
-        User user = authenticate(request, Role.CUSTOMER);
+        return customerAuthResponse(authenticate(request, Role.CUSTOMER));
+    }
+
+    @Override
+    public AuthResponse loginBusinessOwner(LoginRequest request) {
+        return businessOwnerAuthResponse(authenticate(request, Role.BUSINESS_OWNER));
+    }
+
+    @Override
+    @Transactional(noRollbackFor = UnauthorizedException.class)
+    public AuthResponse refresh(RefreshTokenRequest request) {
+        User user = tokenService.consumeRefreshToken(request.getRefreshToken());
+        return switch (user.getRole()) {
+            case CUSTOMER -> customerAuthResponse(user);
+            case BUSINESS_OWNER -> businessOwnerAuthResponse(user);
+        };
+    }
+
+    @Override
+    @Transactional
+    public void logout(RefreshTokenRequest request) {
+        tokenService.revokeRefreshToken(request.getRefreshToken());
+    }
+
+    private AuthResponse customerAuthResponse(User user) {
         Customer customer = customerRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new UnauthorizedException(ErrorMessageKeys.INVALID_CREDENTIALS));
         return toAuthResponse(user, customer.getId(), null);
     }
 
-    @Override
-    public AuthResponse loginBusinessOwner(LoginRequest request) {
-        User user = authenticate(request, Role.BUSINESS_OWNER);
+    private AuthResponse businessOwnerAuthResponse(User user) {
         Long businessId = businessRepository.findByOwnerId(user.getId())
                 .map(Business::getId)
                 .orElse(null);
@@ -101,7 +124,8 @@ public class AuthServiceImpl implements AuthService {
 
     private AuthResponse toAuthResponse(User user, Long actorId, Long businessId) {
         String token = tokenService.generateToken(user);
-        return new AuthResponse(token, user.getRole(), actorId, businessId);
+        String refreshToken = tokenService.createRefreshToken(user);
+        return new AuthResponse(token, refreshToken, user.getRole(), actorId, businessId);
     }
 
     private String normalizeEmail(String email) {
