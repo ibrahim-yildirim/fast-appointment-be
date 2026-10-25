@@ -12,6 +12,7 @@ import org.fastappointment.mapper.CustomerEntityToCustomerResponse;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.service.CustomerService;
+import org.fastappointment.util.PhoneNumbers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +52,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public CustomerResponse createForOwner(Long ownerId, CreateCustomerRequest request) {
         Business business = findOwnerBusiness(ownerId);
-        String phone = normalizePhone(request.getPhone());
+        String phone = PhoneNumbers.normalize(request.getPhone());
         if (customerRepository.existsByBusinessIdAndPhone(business.getId(), phone)) {
             throw new ConflictException(ErrorMessageKeys.CUSTOMER_PHONE_TAKEN, phone);
         }
@@ -69,7 +70,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse updateForCustomer(Long userId, UpdateCustomerRequest request) {
         Customer customer = customerRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, userId));
-        String phone = request.getPhone() == null || request.getPhone().isBlank() ? null : normalizePhone(request.getPhone());
+        String phone = request.getPhone() == null || request.getPhone().isBlank() ? null : PhoneNumbers.normalize(request.getPhone());
         customer.update(request.getName(), phone);
         customer.getUser().updateName(request.getName());
         return customerEntityToCustomerResponse.toResponse(customer);
@@ -78,9 +79,5 @@ public class CustomerServiceImpl implements CustomerService {
     private Business findOwnerBusiness(Long ownerId) {
         return businessRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
-    }
-
-    private String normalizePhone(String phone) {
-        return phone.replaceAll("[^0-9+]", "");
     }
 }

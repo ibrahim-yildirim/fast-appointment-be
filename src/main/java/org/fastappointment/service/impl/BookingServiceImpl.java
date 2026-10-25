@@ -27,6 +27,7 @@ import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.repository.ServiceOfferingRepository;
 import org.fastappointment.repository.StaffRepository;
 import org.fastappointment.service.BookingService;
+import org.fastappointment.util.PhoneNumbers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -267,7 +268,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Customer findOrCreateBusinessCustomer(Business business, String name, String rawPhone, String email) {
-        String phone = normalizePhone(rawPhone);
+        String phone = PhoneNumbers.normalize(rawPhone);
         return customerRepository.findByBusinessIdAndPhone(business.getId(), phone)
                 .orElseGet(() -> customerRepository.save(Customer.builder()
                         .business(business)
@@ -275,10 +276,6 @@ public class BookingServiceImpl implements BookingService {
                         .phone(phone)
                         .email(email)
                         .build()));
-    }
-
-    private String normalizePhone(String phone) {
-        return phone.replaceAll("[^0-9+]", "");
     }
 
     private ServiceOffering findService(Business business, Long serviceId) {
