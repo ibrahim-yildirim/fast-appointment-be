@@ -83,6 +83,7 @@ public class BookingServiceImpl implements BookingService {
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
+        checkNotInPast(business, request.getStartsAt());
         LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
         checkSlotIsFree(business, staff, request.getStartsAt(), endsAt);
         checkCustomerIsFree(customer, request.getStartsAt(), endsAt);
@@ -106,6 +107,7 @@ public class BookingServiceImpl implements BookingService {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        checkNotInPast(booking.getBusiness(), request.getStartsAt());
         return bookingEntityToCustomerBookingResponse.toResponse(reschedule(booking, request));
     }
 
