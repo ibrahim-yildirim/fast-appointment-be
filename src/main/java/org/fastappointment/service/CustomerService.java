@@ -14,5 +14,7 @@ public interface CustomerService {
 
     CustomerResponse createForOwner(Long ownerId, CreateCustomerRequest request);
 
+    CustomerResponse findForCustomer(Long userId);
+
     CustomerResponse updateForCustomer(Long userId, UpdateCustomerRequest request);
 }

@@ -28,6 +28,12 @@ public class CustomerController {
         return ResponseEntity.ok().body(customerService.findAllForOwner(ownerId));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<CustomerResponse> getMe(Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok().body(customerService.findForCustomer(userId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponse> getById(Authentication authentication, @PathVariable Long id) {
         Long ownerId = Long.valueOf(authentication.getName());

@@ -66,6 +66,13 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public CustomerResponse findForCustomer(Long userId) {
+        return customerRepository.findByUserId(userId)
+                .map(customerEntityToCustomerResponse::toResponse)
+                .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, userId));
+    }
+
+    @Override
     @Transactional
     public CustomerResponse updateForCustomer(Long userId, UpdateCustomerRequest request) {
         Customer customer = customerRepository.findByUserId(userId)
