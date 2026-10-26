@@ -4,6 +4,7 @@ import org.fastappointment.api.dto.BusinessHoursRequest;
 import org.fastappointment.api.dto.BusinessResponse;
 import org.fastappointment.api.dto.CreateBusinessRequest;
 import org.fastappointment.api.dto.UpdateBusinessRequest;
+import org.fastappointment.config.CacheConfig;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.BusinessHours;
 import org.fastappointment.exception.ConflictException;
@@ -14,6 +15,8 @@ import org.fastappointment.repository.BusinessHoursRepository;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.UserRepository;
 import org.fastappointment.service.BusinessService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
+    @Cacheable(CacheConfig.BUSINESSES_CACHE)
     public List<BusinessResponse> findAll() {
         List<Business> businesses = businessRepository.findAll();
         List<Long> businessIds = businesses.stream()
@@ -64,6 +68,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.BUSINESSES_CACHE, allEntries = true)
     public BusinessResponse create(Long ownerId, CreateBusinessRequest request) {
         if (businessRepository.existsByOwnerId(ownerId)) {
             throw new ConflictException(ErrorMessageKeys.OWNER_HAS_BUSINESS);
@@ -94,6 +99,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.BUSINESSES_CACHE, allEntries = true)
     public BusinessResponse update(Long ownerId, UpdateBusinessRequest request) {
         Business business = businessRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
