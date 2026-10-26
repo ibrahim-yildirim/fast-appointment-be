@@ -11,13 +11,14 @@ public class BusinessResponse {
     private final String description;
     private final String timezone;
     private final String address;
+    private final String city;
     private final String phone;
     private final String email;
     private final List<BusinessHoursResponse> defaultHours;
     private final LocalDateTime createdAt;
 
     public BusinessResponse(Long id, String slug, String name, String description, String timezone,
-                            String address, String phone, String email, List<BusinessHoursResponse> defaultHours,
+                            String address, String city, String phone, String email, List<BusinessHoursResponse> defaultHours,
                             LocalDateTime createdAt) {
         this.id = id;
         this.slug = slug;
@@ -25,6 +26,7 @@ public class BusinessResponse {
         this.description = description;
         this.timezone = timezone;
         this.address = address;
+        this.city = city;
         this.phone = phone;
         this.email = email;
         this.defaultHours = defaultHours;
@@ -53,6 +55,10 @@ public class BusinessResponse {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getCity() {
+        return city;
     }
 
     public String getPhone() {

@@ -27,6 +27,8 @@ public class Business extends BaseEntity {
 
     private String address;
 
+    private String city;
+
     private String phone;
 
     private String email;
@@ -41,6 +43,7 @@ public class Business extends BaseEntity {
         this.description = builder.description;
         this.timezone = builder.timezone;
         this.address = builder.address;
+        this.city = builder.city;
         this.phone = builder.phone;
         this.email = builder.email;
     }
@@ -77,6 +80,10 @@ public class Business extends BaseEntity {
         return address;
     }
 
+    public String getCity() {
+        return city;
+    }
+
     public String getPhone() {
         return phone;
     }
@@ -85,11 +92,13 @@ public class Business extends BaseEntity {
         return email;
     }
 
-    public void update(String name, String description, String timezone, String address, String phone, String email) {
+    public void update(String name, String description, String timezone, String address, String city,
+                       String phone, String email) {
         this.name = name;
         this.description = description;
         this.timezone = timezone;
         this.address = address;
+        this.city = city;
         this.phone = phone;
         this.email = email;
     }
@@ -102,6 +111,7 @@ public class Business extends BaseEntity {
         private String description;
         private String timezone;
         private String address;
+        private String city;
         private String phone;
         private String email;
 
@@ -135,6 +145,11 @@ public class Business extends BaseEntity {
 
         public Builder address(String address) {
             this.address = address;
+            return this;
+        }
+
+        public Builder city(String city) {
+            this.city = city;
             return this;
         }
 

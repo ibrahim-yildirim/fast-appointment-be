@@ -78,6 +78,7 @@ public class BusinessServiceImpl implements BusinessService {
                 .description(request.getDescription())
                 .timezone(request.getTimezone())
                 .address(request.getAddress())
+                .city(request.getCity())
                 .phone(request.getPhone())
                 .email(request.getEmail())
                 .build();
@@ -97,7 +98,7 @@ public class BusinessServiceImpl implements BusinessService {
         Business business = businessRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
         business.update(request.getName(), request.getDescription(), request.getTimezone(),
-                request.getAddress(), request.getPhone(), request.getEmail());
+                request.getAddress(), request.getCity(), request.getPhone(), request.getEmail());
 
         Map<DayOfWeek, BusinessHours> hoursByDay = businessHoursRepository.findByBusinessId(business.getId()).stream()
                 .collect(Collectors.toMap(BusinessHours::getDayOfWeek, hours -> hours));

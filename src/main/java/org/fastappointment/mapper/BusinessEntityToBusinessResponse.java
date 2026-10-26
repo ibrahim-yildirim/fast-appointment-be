@@ -30,6 +30,7 @@ public class BusinessEntityToBusinessResponse {
                 business.getDescription(),
                 business.getTimezone(),
                 business.getAddress(),
+                business.getCity(),
                 business.getPhone(),
                 business.getEmail(),
                 defaultHours,

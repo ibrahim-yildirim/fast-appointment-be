@@ -27,6 +27,10 @@ public class UpdateBusinessRequest {
     private String address;
 
     @NotBlank
+    @Size(max = 60)
+    private String city;
+
+    @NotBlank
     @Size(max = 32)
     private String phone;
 
@@ -82,6 +86,14 @@ public class UpdateBusinessRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getPhone() {
