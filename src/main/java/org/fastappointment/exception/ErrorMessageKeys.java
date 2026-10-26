@@ -10,6 +10,7 @@ public final class ErrorMessageKeys {
     public static final String STAFF_NOT_FOUND = "error.staff.notFound";
     public static final String CUSTOMER_NOT_FOUND = "error.customer.notFound";
     public static final String CUSTOMER_PHONE_TAKEN = "error.customer.phoneTaken";
+    public static final String CUSTOMER_PHONE_REQUIRED = "error.customer.phoneRequired";
     public static final String BOOKING_NOT_FOUND = "error.booking.notFound";
     public static final String STAFF_NOT_ELIGIBLE = "error.booking.staffNotEligible";
     public static final String CUSTOMER_NOT_AVAILABLE = "error.booking.customerNotAvailable";

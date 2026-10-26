@@ -3,6 +3,7 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.AuthResponse;
 import org.fastappointment.api.dto.LoginRequest;
 import org.fastappointment.api.dto.RefreshTokenRequest;
+import org.fastappointment.api.dto.RegisterCustomerRequest;
 import org.fastappointment.api.dto.RegisterRequest;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.Customer;
@@ -16,6 +17,7 @@ import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.repository.UserRepository;
 import org.fastappointment.service.AuthService;
 import org.fastappointment.service.TokenService;
+import org.fastappointment.util.PhoneNumbers;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,12 +43,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse registerCustomer(RegisterRequest request) {
+    public AuthResponse registerCustomer(RegisterCustomerRequest request) {
         User user = createUser(request, Role.CUSTOMER);
         Customer customer = Customer.builder()
                 .user(user)
                 .name(user.getName())
                 .email(user.getEmail())
+                .phone(PhoneNumbers.normalize(request.getPhone()))
                 .build();
         Customer savedCustomer = customerRepository.save(customer);
         return toAuthResponse(user, savedCustomer.getId(), null);

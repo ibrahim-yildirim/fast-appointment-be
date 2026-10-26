@@ -77,8 +77,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse updateForCustomer(Long userId, UpdateCustomerRequest request) {
         Customer customer = customerRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.CUSTOMER_NOT_FOUND, userId));
-        String phone = request.getPhone() == null || request.getPhone().isBlank() ? null : PhoneNumbers.normalize(request.getPhone());
-        customer.update(request.getName(), phone);
+        customer.update(request.getName(), PhoneNumbers.normalize(request.getPhone()));
         customer.getUser().updateName(request.getName());
         return customerEntityToCustomerResponse.toResponse(customer);
     }

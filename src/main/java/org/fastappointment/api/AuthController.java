@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.fastappointment.api.dto.AuthResponse;
 import org.fastappointment.api.dto.LoginRequest;
 import org.fastappointment.api.dto.RefreshTokenRequest;
+import org.fastappointment.api.dto.RegisterCustomerRequest;
 import org.fastappointment.api.dto.RegisterRequest;
 import org.fastappointment.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/register")
-    public ResponseEntity<AuthResponse> registerCustomer(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> registerCustomer(@Valid @RequestBody RegisterCustomerRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerCustomer(request));
     }
 

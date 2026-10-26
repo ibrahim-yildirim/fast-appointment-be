@@ -79,6 +79,9 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public CustomerBookingResponse createForCustomer(Long userId, CreateBookingRequest request) {
         Customer customer = findCustomer(userId);
+        if (customer.getPhone() == null) {
+            throw new ConflictException(ErrorMessageKeys.CUSTOMER_PHONE_REQUIRED);
+        }
         Business business = businessRepository.findById(request.getBusinessId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BUSINESS_NOT_FOUND, request.getBusinessId()));
         ServiceOffering service = findService(business, request.getServiceId());
