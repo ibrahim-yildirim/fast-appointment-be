@@ -15,6 +15,7 @@ import org.fastappointment.repository.BusinessHoursRepository;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.UserRepository;
 import org.fastappointment.service.BusinessService;
+import org.fastappointment.util.PhoneNumbers;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -84,7 +85,7 @@ public class BusinessServiceImpl implements BusinessService {
                 .timezone(request.getTimezone())
                 .address(request.getAddress())
                 .city(request.getCity())
-                .phone(request.getPhone())
+                .phone(PhoneNumbers.normalize(request.getPhone()))
                 .email(request.getEmail())
                 .build();
         Business savedBusiness = businessRepository.save(business);
@@ -104,7 +105,7 @@ public class BusinessServiceImpl implements BusinessService {
         Business business = businessRepository.findByOwnerId(ownerId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.OWNER_HAS_NO_BUSINESS));
         business.update(request.getName(), request.getDescription(), request.getTimezone(),
-                request.getAddress(), request.getCity(), request.getPhone(), request.getEmail());
+                request.getAddress(), request.getCity(), PhoneNumbers.normalize(request.getPhone()), request.getEmail());
 
         Map<DayOfWeek, BusinessHours> hoursByDay = businessHoursRepository.findByBusinessId(business.getId()).stream()
                 .collect(Collectors.toMap(BusinessHours::getDayOfWeek, hours -> hours));

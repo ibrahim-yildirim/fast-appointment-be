@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.fastappointment.util.PhoneNumbers;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class CreateBusinessRequest {
     private String city;
 
     @NotBlank
-    @Size(max = 32)
+    @Pattern(regexp = PhoneNumbers.BUSINESS_PATTERN, message = "{error.validation.businessPhone}")
     private String phone;
 
     @NotBlank

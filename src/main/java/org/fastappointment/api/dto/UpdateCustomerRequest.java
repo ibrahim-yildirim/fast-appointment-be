@@ -1,7 +1,9 @@
 package org.fastappointment.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.fastappointment.util.PhoneNumbers;
 
 public class UpdateCustomerRequest {
 
@@ -10,7 +12,7 @@ public class UpdateCustomerRequest {
     private String name;
 
     @NotBlank
-    @Size(max = 32)
+    @Pattern(regexp = PhoneNumbers.MOBILE_PATTERN, message = "{error.validation.mobilePhone}")
     private String phone;
 
     public String getName() {

@@ -4,7 +4,9 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.fastappointment.util.PhoneNumbers;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +23,7 @@ public class CreateBusinessBookingRequest {
     private String customerName;
 
     @NotBlank
-    @Size(max = 32)
+    @Pattern(regexp = PhoneNumbers.MOBILE_PATTERN, message = "{error.validation.mobilePhone}")
     private String customerPhone;
 
     @Email
