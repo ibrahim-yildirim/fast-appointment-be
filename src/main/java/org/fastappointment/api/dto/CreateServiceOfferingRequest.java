@@ -1,10 +1,13 @@
 package org.fastappointment.api.dto;
 
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import org.fastappointment.util.AppConstants;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +22,7 @@ public class CreateServiceOfferingRequest {
 
     @NotNull
     @Positive
+    @Max(value = AppConstants.SERVICE_MAX_DURATION_MINUTES, message = "{error.service.durationStep}")
     private Integer durationMinutes;
 
     @NotNull
@@ -45,6 +49,11 @@ public class CreateServiceOfferingRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @AssertTrue(message = "{error.service.durationStep}")
+    public boolean isDurationOnStep() {
+        return durationMinutes == null || durationMinutes % AppConstants.SERVICE_DURATION_STEP_MINUTES == 0;
     }
 
     public Integer getDurationMinutes() {
