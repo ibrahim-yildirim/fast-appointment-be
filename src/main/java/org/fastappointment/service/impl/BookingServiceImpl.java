@@ -31,6 +31,7 @@ import org.fastappointment.util.PhoneNumbers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -42,6 +43,7 @@ import java.util.UUID;
 public class BookingServiceImpl implements BookingService {
 
     private static final int GUEST_UPCOMING_BOOKING_LIMIT = 2;
+    private static final int OWNER_BOOKING_WINDOW_DAYS = 30;
 
     private final BookingRepository bookingRepository;
     private final BusinessRepository businessRepository;
@@ -138,6 +140,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponse createForOwner(Long ownerId, CreateBusinessBookingRequest request) {
         Business business = findOwnerBusiness(ownerId);
+        checkWithinOwnerWindow(business, request.getStartsAt());
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
@@ -167,6 +170,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
         checkNotStarted(booking);
         checkNotInPast(business, request.getStartsAt());
+        checkWithinOwnerWindow(business, request.getStartsAt());
         return bookingEntityToBookingResponse.toResponse(reschedule(booking, request));
     }
 
@@ -248,6 +252,16 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of(business.getTimezone()));
         if (!startsAt.isAfter(now)) {
             throw new ConflictException(ErrorMessageKeys.BOOKING_IN_THE_PAST);
+        }
+    }
+
+    private void checkWithinOwnerWindow(Business business, LocalDateTime startsAt) {
+        LocalDate today = LocalDate.now(ZoneId.of(business.getTimezone()));
+        if (startsAt.toLocalDate().isAfter(today.plusDays(OWNER_BOOKING_WINDOW_DAYS))) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_TOO_FAR_AHEAD, OWNER_BOOKING_WINDOW_DAYS);
+        }
+        if (startsAt.toLocalDate().isBefore(today.minusDays(OWNER_BOOKING_WINDOW_DAYS))) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_TOO_FAR_BACK, OWNER_BOOKING_WINDOW_DAYS);
         }
     }
 
