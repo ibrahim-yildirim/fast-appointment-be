@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 public class BookingEntityToBookingResponse {
 
     public BookingResponse toResponse(Booking booking) {
+        Long serviceId = null;
+        if (booking.getService() != null) {
+            serviceId = booking.getService().getId();
+        }
         Long customerId = null;
         if (booking.getCustomer() != null) {
             customerId = booking.getCustomer().getId();
@@ -15,7 +19,9 @@ public class BookingEntityToBookingResponse {
         return new BookingResponse(
                 booking.getId(),
                 booking.getBusiness().getId(),
-                booking.getService().getId(),
+                serviceId,
+                booking.getServiceName(),
+                booking.getServicePrice(),
                 booking.getStaff().getId(),
                 customerId,
                 booking.getStartsAt(),

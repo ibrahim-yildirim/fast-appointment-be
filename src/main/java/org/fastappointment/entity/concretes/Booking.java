@@ -6,6 +6,7 @@ import org.fastappointment.entity.enums.BookingStatus;
 import org.fastappointment.entity.enums.CancelledBy;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -26,6 +27,10 @@ public class Booking extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ServiceOffering service;
+
+    private String serviceName;
+
+    private BigDecimal servicePrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Staff staff;
@@ -84,6 +89,14 @@ public class Booking extends BaseEntity {
         return service;
     }
 
+    public String getServiceName() {
+        return service != null ? service.getName() : serviceName;
+    }
+
+    public BigDecimal getServicePrice() {
+        return service != null ? service.getPrice() : servicePrice;
+    }
+
     public Staff getStaff() {
         return staff;
     }
@@ -122,6 +135,12 @@ public class Booking extends BaseEntity {
         this.startsAt = startsAt;
         this.endsAt = endsAt;
         this.notes = notes;
+    }
+
+    public void detachService() {
+        this.serviceName = service.getName();
+        this.servicePrice = service.getPrice();
+        this.service = null;
     }
 
     public void cancel(CancelledBy cancelledBy, String reason) {

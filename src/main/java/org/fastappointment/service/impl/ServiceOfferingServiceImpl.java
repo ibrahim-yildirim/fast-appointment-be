@@ -3,12 +3,14 @@ package org.fastappointment.service.impl;
 import org.fastappointment.api.dto.CreateServiceOfferingRequest;
 import org.fastappointment.api.dto.ServiceOfferingResponse;
 import org.fastappointment.api.dto.UpdateServiceOfferingRequest;
+import org.fastappointment.entity.concretes.Booking;
 import org.fastappointment.entity.concretes.Business;
 import org.fastappointment.entity.concretes.ServiceOffering;
 import org.fastappointment.entity.concretes.Staff;
 import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.NotFoundException;
 import org.fastappointment.mapper.ServiceOfferingEntityToServiceOfferingResponse;
+import org.fastappointment.repository.BookingRepository;
 import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.ServiceOfferingRepository;
 import org.fastappointment.repository.StaffRepository;
@@ -26,15 +28,18 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     private final ServiceOfferingRepository serviceOfferingRepository;
     private final BusinessRepository businessRepository;
     private final StaffRepository staffRepository;
+    private final BookingRepository bookingRepository;
     private final ServiceOfferingEntityToServiceOfferingResponse serviceOfferingEntityToServiceOfferingResponse;
 
     public ServiceOfferingServiceImpl(ServiceOfferingRepository serviceOfferingRepository,
                                       BusinessRepository businessRepository,
                                       StaffRepository staffRepository,
+                                      BookingRepository bookingRepository,
                                       ServiceOfferingEntityToServiceOfferingResponse serviceOfferingEntityToServiceOfferingResponse) {
         this.serviceOfferingRepository = serviceOfferingRepository;
         this.businessRepository = businessRepository;
         this.staffRepository = staffRepository;
+        this.bookingRepository = bookingRepository;
         this.serviceOfferingEntityToServiceOfferingResponse = serviceOfferingEntityToServiceOfferingResponse;
     }
 
@@ -89,6 +94,15 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     public void deactivate(Long ownerId, Long id) {
         Business business = findOwnerBusiness(ownerId);
         findOwnService(business, id).deactivate();
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long ownerId, Long id) {
+        Business business = findOwnerBusiness(ownerId);
+        ServiceOffering service = findOwnService(business, id);
+        bookingRepository.findByServiceId(service.getId()).forEach(Booking::detachService);
+        serviceOfferingRepository.delete(service);
     }
 
     private Business findOwnerBusiness(Long ownerId) {

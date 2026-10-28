@@ -53,4 +53,11 @@ public class ServiceOfferingController {
         serviceOfferingService.deactivate(ownerId, id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/services/{id}/permanent")
+    public ResponseEntity<Void> delete(Authentication authentication, @PathVariable Long id) {
+        Long ownerId = Long.valueOf(authentication.getName());
+        serviceOfferingService.delete(ownerId, id);
+        return ResponseEntity.noContent().build();
+    }
 }

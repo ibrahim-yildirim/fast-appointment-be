@@ -17,4 +17,6 @@ public interface ServiceOfferingService {
     ServiceOfferingResponse update(Long ownerId, Long id, UpdateServiceOfferingRequest request);
 
     void deactivate(Long ownerId, Long id);
+
+    void delete(Long ownerId, Long id);
 }

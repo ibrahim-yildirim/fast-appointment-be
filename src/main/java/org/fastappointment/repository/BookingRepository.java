@@ -18,7 +18,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @EntityGraph(attributePaths = {"business", "service", "staff"})
     List<Booking> findByCustomerIdOrderByStartsAtAsc(Long customerId);
 
+    @EntityGraph(attributePaths = {"service"})
     List<Booking> findByBusinessId(Long businessId);
+
+    List<Booking> findByServiceId(Long serviceId);
 
     Optional<Booking> findByIdAndCustomerId(Long id, Long customerId);
 
