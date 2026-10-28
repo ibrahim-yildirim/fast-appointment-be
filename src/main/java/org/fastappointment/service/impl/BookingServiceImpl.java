@@ -111,6 +111,7 @@ public class BookingServiceImpl implements BookingService {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        checkNotStarted(booking);
         checkNotInPast(booking.getBusiness(), request.getStartsAt());
         return bookingEntityToCustomerBookingResponse.toResponse(reschedule(booking, request));
     }
@@ -121,6 +122,7 @@ public class BookingServiceImpl implements BookingService {
         Customer customer = findCustomer(userId);
         Booking booking = bookingRepository.findByIdAndCustomerId(bookingId, customer.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        checkNotStarted(booking);
         booking.cancel(CancelledBy.CUSTOMER, cancellationReason(request));
     }
 
@@ -163,6 +165,8 @@ public class BookingServiceImpl implements BookingService {
         Business business = findOwnerBusiness(ownerId);
         Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        checkNotStarted(booking);
+        checkNotInPast(business, request.getStartsAt());
         return bookingEntityToBookingResponse.toResponse(reschedule(booking, request));
     }
 
@@ -172,6 +176,7 @@ public class BookingServiceImpl implements BookingService {
         Business business = findOwnerBusiness(ownerId);
         Booking booking = bookingRepository.findByIdAndBusinessId(bookingId, business.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
+        checkNotStarted(booking);
         booking.cancel(CancelledBy.BUSINESS, cancellationReason(request));
     }
 
@@ -229,7 +234,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void cancelByUid(UUID uid, CancelBookingRequest request) {
-        findBookingByUid(uid).cancel(CancelledBy.CUSTOMER, cancellationReason(request));
+        Booking booking = findBookingByUid(uid);
+        checkNotStarted(booking);
+        booking.cancel(CancelledBy.CUSTOMER, cancellationReason(request));
     }
 
     private Booking findBookingByUid(UUID uid) {
@@ -241,6 +248,13 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of(business.getTimezone()));
         if (!startsAt.isAfter(now)) {
             throw new ConflictException(ErrorMessageKeys.BOOKING_IN_THE_PAST);
+        }
+    }
+
+    private void checkNotStarted(Booking booking) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of(booking.getBusiness().getTimezone()));
+        if (!booking.getStartsAt().isAfter(now)) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_ALREADY_STARTED);
         }
     }
 
