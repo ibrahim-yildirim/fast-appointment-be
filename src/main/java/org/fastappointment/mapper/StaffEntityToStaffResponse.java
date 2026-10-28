@@ -14,6 +14,7 @@ public class StaffEntityToStaffResponse {
                 staff.getBusiness().getId(),
                 staff.getName(),
                 staff.getEmail(),
+                staff.getPhone(),
                 staff.getColorTag(),
                 staff.getActive(),
                 staff.getServices().stream()

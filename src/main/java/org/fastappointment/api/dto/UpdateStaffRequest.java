@@ -3,7 +3,9 @@ package org.fastappointment.api.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.fastappointment.util.PhoneNumbers;
 
 import java.util.List;
 
@@ -17,6 +19,9 @@ public class UpdateStaffRequest {
     @Email
     @Size(max = 255)
     private String email;
+
+    @Pattern(regexp = PhoneNumbers.MOBILE_PATTERN, message = "{error.validation.mobilePhone}")
+    private String phone;
 
     @Size(max = 32)
     private String colorTag;
@@ -38,6 +43,14 @@ public class UpdateStaffRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getColorTag() {

@@ -15,6 +15,7 @@ import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.ServiceOfferingRepository;
 import org.fastappointment.repository.StaffRepository;
 import org.fastappointment.service.StaffService;
+import org.fastappointment.util.PhoneNumbers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +67,7 @@ public class StaffServiceImpl implements StaffService {
                 .business(business)
                 .name(request.getName())
                 .email(request.getEmail())
+                .phone(normalizePhone(request.getPhone()))
                 .colorTag(request.getColorTag())
                 .build());
         assignServices(business, staff, services);
@@ -78,7 +80,7 @@ public class StaffServiceImpl implements StaffService {
         Business business = findOwnerBusiness(ownerId);
         Staff staff = findOwnStaff(business, id);
         List<ServiceOffering> services = findOwnServices(business, request.getServiceIds());
-        staff.update(request.getName(), request.getEmail(), request.getColorTag());
+        staff.update(request.getName(), request.getEmail(), normalizePhone(request.getPhone()), request.getColorTag());
         assignServices(business, staff, services);
         return staffEntityToStaffResponse.toResponse(staff);
     }
@@ -88,6 +90,13 @@ public class StaffServiceImpl implements StaffService {
     public void deactivate(Long ownerId, Long id) {
         Business business = findOwnerBusiness(ownerId);
         findOwnStaff(business, id).deactivate();
+    }
+
+    private String normalizePhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            return null;
+        }
+        return PhoneNumbers.normalize(phone);
     }
 
     private Business findOwnerBusiness(Long ownerId) {

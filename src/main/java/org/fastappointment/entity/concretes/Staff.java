@@ -22,6 +22,8 @@ public class Staff extends BaseEntity {
 
     private String email;
 
+    private String phone;
+
     private String colorTag;
 
     @ColumnDefault("true")
@@ -38,6 +40,7 @@ public class Staff extends BaseEntity {
         this.business = builder.business;
         this.name = builder.name;
         this.email = builder.email;
+        this.phone = builder.phone;
         this.colorTag = builder.colorTag;
         this.active = true;
     }
@@ -62,6 +65,10 @@ public class Staff extends BaseEntity {
         return email;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
     public String getColorTag() {
         return colorTag;
     }
@@ -74,9 +81,10 @@ public class Staff extends BaseEntity {
         return services;
     }
 
-    public void update(String name, String email, String colorTag) {
+    public void update(String name, String email, String phone, String colorTag) {
         this.name = name;
         this.email = email;
+        this.phone = phone;
         this.colorTag = colorTag;
     }
 
@@ -89,6 +97,7 @@ public class Staff extends BaseEntity {
         private Business business;
         private String name;
         private String email;
+        private String phone;
         private String colorTag;
 
         private Builder() {
@@ -106,6 +115,11 @@ public class Staff extends BaseEntity {
 
         public Builder email(String email) {
             this.email = email;
+            return this;
+        }
+
+        public Builder phone(String phone) {
+            this.phone = phone;
             return this;
         }
 
