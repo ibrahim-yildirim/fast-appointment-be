@@ -17,6 +17,7 @@ import org.fastappointment.repository.BusinessRepository;
 import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.repository.ServiceOfferingRepository;
 import org.fastappointment.service.SlotService;
+import org.fastappointment.util.AppConstants;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -33,8 +34,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class SlotServiceImpl implements SlotService {
-
-    private static final int SLOT_INTERVAL_MINUTES = 30;
 
     private final BusinessRepository businessRepository;
     private final ServiceOfferingRepository serviceOfferingRepository;
@@ -104,7 +103,7 @@ public class SlotServiceImpl implements SlotService {
         LocalDateTime closing = date.atTime(hours.getEndTime());
         for (LocalDateTime start = date.atTime(hours.getStartTime());
              !start.plusMinutes(durationMinutes).isAfter(closing);
-             start = start.plusMinutes(SLOT_INTERVAL_MINUTES)) {
+             start = start.plusMinutes(AppConstants.SLOT_INTERVAL_MINUTES)) {
             if (!start.isAfter(now)) {
                 continue;
             }

@@ -27,10 +27,12 @@ import org.fastappointment.repository.CustomerRepository;
 import org.fastappointment.repository.ServiceOfferingRepository;
 import org.fastappointment.repository.StaffRepository;
 import org.fastappointment.service.BookingService;
+import org.fastappointment.util.AppConstants;
 import org.fastappointment.util.PhoneNumbers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,9 +43,6 @@ import java.util.UUID;
 
 @Service
 public class BookingServiceImpl implements BookingService {
-
-    private static final int GUEST_UPCOMING_BOOKING_LIMIT = 2;
-    private static final int OWNER_BOOKING_WINDOW_DAYS = 30;
 
     private final BookingRepository bookingRepository;
     private final BusinessRepository businessRepository;
@@ -90,6 +89,7 @@ public class BookingServiceImpl implements BookingService {
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
         checkNotInPast(business, request.getStartsAt());
+        checkOnSlotGrid(business, request.getStartsAt());
         LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
         checkSlotIsFree(business, staff, request.getStartsAt(), endsAt);
         checkCustomerIsFree(customer, request.getStartsAt(), endsAt);
@@ -115,6 +115,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessageKeys.BOOKING_NOT_FOUND, bookingId));
         checkNotStarted(booking);
         checkNotInPast(booking.getBusiness(), request.getStartsAt());
+        checkOnSlotGrid(booking.getBusiness(), request.getStartsAt());
         return bookingEntityToCustomerBookingResponse.toResponse(reschedule(booking, request));
     }
 
@@ -210,6 +211,7 @@ public class BookingServiceImpl implements BookingService {
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
         checkNotInPast(business, request.getStartsAt());
+        checkOnSlotGrid(business, request.getStartsAt());
         LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
         checkSlotIsFree(business, staff, request.getStartsAt(), endsAt);
         Customer customer = findOrCreateBusinessCustomer(business, request.getCustomerName(),
@@ -255,13 +257,27 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    private void checkOnSlotGrid(Business business, LocalDateTime startsAt) {
+        Optional<BusinessHours> hours = businessHoursRepository.findByBusinessIdAndDayOfWeek(
+                business.getId(), startsAt.getDayOfWeek());
+        if (hours.isEmpty() || !Boolean.TRUE.equals(hours.get().getEnabled())) {
+            return;
+        }
+        long minutesFromOpening = Duration.between(hours.get().getStartTime(), startsAt.toLocalTime()).toMinutes();
+        boolean onGrid = startsAt.getSecond() == 0 && startsAt.getNano() == 0
+                && minutesFromOpening % AppConstants.SLOT_INTERVAL_MINUTES == 0;
+        if (!onGrid) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_OFF_GRID);
+        }
+    }
+
     private void checkWithinOwnerWindow(Business business, LocalDateTime startsAt) {
         LocalDate today = LocalDate.now(ZoneId.of(business.getTimezone()));
-        if (startsAt.toLocalDate().isAfter(today.plusDays(OWNER_BOOKING_WINDOW_DAYS))) {
-            throw new ConflictException(ErrorMessageKeys.BOOKING_TOO_FAR_AHEAD, OWNER_BOOKING_WINDOW_DAYS);
+        if (startsAt.toLocalDate().isAfter(today.plusDays(AppConstants.OWNER_BOOKING_WINDOW_DAYS))) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_TOO_FAR_AHEAD, AppConstants.OWNER_BOOKING_WINDOW_DAYS);
         }
-        if (startsAt.toLocalDate().isBefore(today.minusDays(OWNER_BOOKING_WINDOW_DAYS))) {
-            throw new ConflictException(ErrorMessageKeys.BOOKING_TOO_FAR_BACK, OWNER_BOOKING_WINDOW_DAYS);
+        if (startsAt.toLocalDate().isBefore(today.minusDays(AppConstants.OWNER_BOOKING_WINDOW_DAYS))) {
+            throw new ConflictException(ErrorMessageKeys.BOOKING_TOO_FAR_BACK, AppConstants.OWNER_BOOKING_WINDOW_DAYS);
         }
     }
 
@@ -276,8 +292,8 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of(business.getTimezone()));
         long upcoming = bookingRepository.countByCustomerIdAndStatusAndStartsAtAfter(
                 customer.getId(), BookingStatus.CONFIRMED, now);
-        if (upcoming >= GUEST_UPCOMING_BOOKING_LIMIT) {
-            throw new ConflictException(ErrorMessageKeys.GUEST_LIMIT_REACHED, GUEST_UPCOMING_BOOKING_LIMIT);
+        if (upcoming >= AppConstants.GUEST_UPCOMING_BOOKING_LIMIT) {
+            throw new ConflictException(ErrorMessageKeys.GUEST_LIMIT_REACHED, AppConstants.GUEST_UPCOMING_BOOKING_LIMIT);
         }
     }
 

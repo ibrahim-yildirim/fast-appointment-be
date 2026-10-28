@@ -2,13 +2,12 @@ package org.fastappointment.api.dto;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
+import org.fastappointment.util.AppConstants;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
 public class SlotSearchRequest {
-
-    public static final int MAX_DAYS = 30;
 
     @NotNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -23,7 +22,7 @@ public class SlotSearchRequest {
         if (from == null || to == null) {
             return true;
         }
-        return !to.isBefore(from) && !to.isAfter(from.plusDays(MAX_DAYS - 1));
+        return !to.isBefore(from) && !to.isAfter(from.plusDays(AppConstants.SLOT_SEARCH_MAX_DAYS - 1));
     }
 
     public LocalDate getFrom() {

@@ -22,6 +22,7 @@ public final class ErrorMessageKeys {
     public static final String BOOKING_ALREADY_STARTED = "error.booking.alreadyStarted";
     public static final String BOOKING_TOO_FAR_AHEAD = "error.booking.tooFarAhead";
     public static final String BOOKING_TOO_FAR_BACK = "error.booking.tooFarBack";
+    public static final String BOOKING_OFF_GRID = "error.booking.offGrid";
     public static final String GUEST_LIMIT_REACHED = "error.booking.guestLimitReached";
     public static final String EMAIL_TAKEN = "error.auth.emailTaken";
     public static final String INVALID_CREDENTIALS = "error.auth.invalidCredentials";

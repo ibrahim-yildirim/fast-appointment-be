@@ -7,6 +7,7 @@ import org.fastappointment.exception.ErrorMessageKeys;
 import org.fastappointment.exception.UnauthorizedException;
 import org.fastappointment.repository.RefreshTokenRepository;
 import org.fastappointment.service.TokenService;
+import org.fastappointment.util.AppConstants;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -25,8 +26,6 @@ import java.util.HexFormat;
 
 @Service
 public class TokenServiceImpl implements TokenService {
-
-    private static final int REFRESH_TOKEN_BYTES = 32;
 
     private final JwtProperties jwtProperties;
     private final JwtEncoder jwtEncoder;
@@ -56,7 +55,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String createRefreshToken(User user) {
-        byte[] bytes = new byte[REFRESH_TOKEN_BYTES];
+        byte[] bytes = new byte[AppConstants.REFRESH_TOKEN_BYTES];
         secureRandom.nextBytes(bytes);
         String rawToken = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         RefreshToken refreshToken = RefreshToken.builder()
