@@ -21,4 +21,13 @@ public final class PhoneNumbers {
         }
         return digits;
     }
+
+    public static String format(String phone) {
+        String normalized = normalize(phone);
+        if (normalized.length() != 11 || !normalized.startsWith("0")) {
+            return phone;
+        }
+        return "+90 " + normalized.substring(1, 4) + " " + normalized.substring(4, 7) + " "
+                + normalized.substring(7, 9) + " " + normalized.substring(9);
+    }
 }

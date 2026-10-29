@@ -54,7 +54,7 @@ public class CustomerServiceImpl implements CustomerService {
         Business business = findOwnerBusiness(ownerId);
         String phone = PhoneNumbers.normalize(request.getPhone());
         if (customerRepository.existsByBusinessIdAndPhone(business.getId(), phone)) {
-            throw new ConflictException(ErrorMessageKeys.CUSTOMER_PHONE_TAKEN, phone);
+            throw new ConflictException(ErrorMessageKeys.CUSTOMER_PHONE_TAKEN, PhoneNumbers.format(phone));
         }
         Customer customer = Customer.builder()
                 .business(business)
