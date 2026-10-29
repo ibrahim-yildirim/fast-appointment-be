@@ -145,10 +145,11 @@ public class BookingServiceImpl implements BookingService {
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
-        checkSlotIsFree(business, staff, request.getStartsAt(), request.getEndsAt());
+        LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
+        checkSlotIsFree(business, staff, request.getStartsAt(), endsAt);
         Customer customer = findOrCreateBusinessCustomer(business, request.getCustomerName(),
                 request.getCustomerPhone(), request.getCustomerEmail());
-        checkCustomerIsFree(customer, request.getStartsAt(), request.getEndsAt());
+        checkCustomerIsFree(customer, request.getStartsAt(), endsAt);
 
         Booking booking = Booking.builder()
                 .business(business)
@@ -156,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
                 .staff(staff)
                 .customer(customer)
                 .startsAt(request.getStartsAt())
-                .endsAt(request.getEndsAt())
+                .endsAt(endsAt)
                 .status(BookingStatus.CONFIRMED)
                 .notes(request.getNotes())
                 .build();
@@ -340,20 +341,21 @@ public class BookingServiceImpl implements BookingService {
         ServiceOffering service = findService(business, request.getServiceId());
         Staff staff = findStaff(business, request.getStaffId());
         checkStaffOffersService(staff, service);
-        checkOpeningHours(business, request.getStartsAt(), request.getEndsAt());
+        LocalDateTime endsAt = request.getStartsAt().plusMinutes(service.getDurationMinutes());
+        checkOpeningHours(business, request.getStartsAt(), endsAt);
         staffRepository.lockById(staff.getId());
         boolean staffBusy = bookingRepository.existsOverlappingBookingExcluding(
-                booking.getId(), staff.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
+                booking.getId(), staff.getId(), request.getStartsAt(), endsAt, BookingStatus.CANCELLED);
         if (staffBusy) {
             throw new ConflictException(ErrorMessageKeys.STAFF_NOT_AVAILABLE, staff.getName());
         }
         Customer customer = booking.getCustomer();
         boolean customerBusy = customer != null && bookingRepository.existsOverlappingCustomerBookingExcluding(
-                booking.getId(), customer.getId(), request.getStartsAt(), request.getEndsAt(), BookingStatus.CANCELLED);
+                booking.getId(), customer.getId(), request.getStartsAt(), endsAt, BookingStatus.CANCELLED);
         if (customerBusy) {
             throw new ConflictException(ErrorMessageKeys.CUSTOMER_NOT_AVAILABLE, customer.getName());
         }
-        booking.reschedule(service, staff, request.getStartsAt(), request.getEndsAt(), request.getNotes());
+        booking.reschedule(service, staff, request.getStartsAt(), endsAt, request.getNotes());
         return booking;
     }
 
